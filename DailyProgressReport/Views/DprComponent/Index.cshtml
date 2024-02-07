@@ -1,0 +1,264 @@
+﻿@model DailyProgressReport.Models.ShowComponent
+@{
+    ViewData["Title"] = "Add Component";
+}
+@*
+<div id="addComponentContainer" style="max-width: 800px; align-content: center; margin-left: 225px;"> *@
+
+<div id="addComponentContainer" class="container mt-4">
+    @*    <h3 class="text-center mb-4">Add Component</h3>
+    *@   @*  <form style="text-align: center;">
+
+    <div>
+    <h6 class="mb-4">Project :</h6>
+    <select id="projectName" name="projectName" class="form-control">
+    <option value="">Please Select</option>
+    @foreach (var project in Model.projects)
+    {
+    <option value="@project.ProjectID">@project.ProjectName</option>
+    }
+    </select>
+    </div>
+
+
+    <div class="form-group">
+    <h6 class="mb-4">Component Name:</h6>
+    <input type="text" id="componentName" name="componentName" class="form-control" placeholder="Enter Component Name">
+    </div>
+
+
+    <div style="margin-top: 15px;">
+    <button id="addComponentBtn" type="button" class="btn btn-danger" onclick="addComponent()">Add</button>
+    <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
+    </div>
+    </form> *@
+
+
+    <form style="text-align: center;">
+
+        <div class="form-group">
+            <h6 class="mb-4">Project:</h6>
+            <select id="projectId" name="projectId" class="form-control">
+                <option value="">Please Select</option>
+                @foreach (var project in Model.projects)
+                {
+                    <option value="@project.ProjectID">@project.ProjectName</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <h6 class="mb-4">Component Name:</h6>
+            <input type="text" id="componentName" name="componentName" class="form-control" placeholder="Enter Component Name">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button id="addComponentBtn" type="button" class="btn btn-danger" onclick="addComponent()">Add</button>
+            <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
+        </div>
+    </form>
+
+
+    <br />
+
+    <div id="existingComponentListContainer" class="container mt-4">
+        <h6 class="text-center mb-4">Component List</h6>
+        <!-- Use the design for the component list -->
+        @* <div class="mb-3">
+        <input type="text" id="componentSearch" class="form-control" placeholder="Search Component">
+        </div>*@
+        <table id="componentTable" class="table">
+            <thead>
+                <tr>
+                    <th style="display: none;">Id</th><!-- Hide the ID column -->
+                    @*                     <th>Project Name</th> *@
+                    <th>Component Name</th>
+                    <th>Created Date</th>
+                    <th>CreatedBy</th>
+                    <th>ModifiedDate</th>
+                    <th>ModifiedBy</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var component in Model.compo)
+                {
+                    <tr>
+                        <td style="display: none;">@component.Id</td> <!-- Hide the ID value -->
+                        @*   <td>@component.ProjectName</td> *@
+                        <td>@component.ComponentName</td>
+                        <td>@component.CreatedDate</td>
+                        <td>@component.CreatedBy</td>
+                        <td>@component.ModifiedDate</td>
+                        <td>@component.ModifiedBy</td>
+                        <td>
+                            <i class="edit-icon" onclick="editComponent('@component.Id','@component.ProjectName','@component.ComponentName')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+                            </i>
+
+                            <i class="delete-icon" onclick="deleteComponent('@component.Id')">
+                                <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
+                            </i>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@*<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+*@
+<script>
+    $(document).ready(function () {
+        // Initialize DataTable for the component table
+        $('#componentTable').DataTable({
+            "columnDefs": [
+                {
+                    "targets": [0],  // Index of the column (ProjectID in this case)
+                    "visible": false,
+                    "searchable": false,
+                }
+            ],
+            "order": [[0, "desc"]]  // Sort by ProjectID in descending order
+        });
+
+    });
+
+    function addComponent() {
+        var projectName = $("#projectName").val();
+        var componentName = $("#componentName").val();
+        if (componentName != "") {
+            $.post('@Url.Action("AddComponent", "DprComponent")', { projectName: projectName, componentName: componentName }, function (data) {
+                if (data.success) {
+                    alert(data.message);  // Show success alert
+                    // Reload the DataTable after adding a component
+                    //$('#componentTable').DataTable().ajax.reload();
+                    window.location.href = '/DprComponent/Index';
+                } else {
+                    alert(data.message);  // Show error alert
+                }
+            });
+
+        }
+        else {
+            alert("Please add component name");
+        }
+        // Use AJAX to call the controller action for adding a component
+    }
+
+    function openaddMastersContainer() {
+        window.location.href = '/AddMaster/Index';
+    }
+
+
+
+    function showComponentCodeList() {
+        // Hide the Add Activity Code section
+        $("#addComponentContainer").hide();
+        // Show the Activity Code List section
+        $("#existingComponentListContainer").show();
+    }
+    // function editComponent(Id, ComponentName) {
+    //     // Fill the project name and group code in the respective input fields
+
+    //     $("#componentName").val(ComponentName);
+
+    //     // Change the button text and bind the update function
+    //     $("#addComponentBtn").removeAttr("onclick");
+    //     $("#addComponentBtn").text("Update").off("click").click(function () {
+    //         updateComponent(Id);
+    //     });
+    // }
+
+
+    function editComponent(id, projectName, componentName) {
+        // Fill the project name and component name in the respective input fields
+        $("#projectId").val(projectName);
+        $("#componentName").val(componentName);
+
+        // Change the button text and bind the update function
+        $("#addComponentBtn").removeAttr("onclick");
+        $("#addComponentBtn").text("Update").off("click").click(function () {
+            updateComponent(id);
+        });
+    }
+
+
+    function updateComponent(id) {
+        var projectName = $("#projectId").val();
+        var componentName = $("#componentName").val();
+
+        if (projectName !== "" && componentName !== "") {
+            // Use AJAX to call the controller action for updating a component
+            $.post('@Url.Action("UpdateComponent", "DprComponent")', { id: id, projectName: projectName, componentName: componentName }, function (data) {
+                if (data.success) {
+                    alert(data.message);  // Show success alert
+                    // Reload the page or update the component list
+                    window.location.reload(); // You may choose to reload the page or update the component list
+                } else {
+                    alert(data.message);  // Show error alert
+                }
+            });
+        } else {
+            alert("Please fill in both Project Name and Component Name");
+        }
+    }
+
+
+
+    // function updateComponent(id) {
+    //     var componentName = $("#componentName").val();
+
+    //     if (componentName != "") {
+    //         // Use AJAX to call the controller action for updating a component
+    //         $.post('@Url.Action("UpdateComponent", "DprComponent")', { id: id, componentName: componentName }, function (data) {
+    //             if (data.success) {
+    //                 alert(data.message);  // Show success alert
+    //                 window.location.href = '/DprComponent/Index';
+    //                 // Reload the DataTable after updating a component
+    //                 //$('#componentTable').DataTable().ajax.reload();
+    //                 //// Reset the form and buttons
+    //                 //$("#componentName").val("");
+    //                 //$("#addComponentBtn").text("Add").unbind("click").click(addComponent);
+    //                 //$("#cancelBtn").hide();
+    //             } else {
+    //                 alert(data.message);  // Show error alert
+    //             }
+    //         });
+    //     }
+    //     else {
+    //         alert("Please add component name")
+    //     }
+    // }
+
+    function deleteComponent(id) {
+        if (confirm("Are you sure you want to delete this component?")) {
+            // Use AJAX to call the controller action for deleting a component
+            $.post('@Url.Action("DeleteComponent", "DprComponent")', { id: id }, function (data) {
+                if (data.success) {
+                    alert(data.message);  // Show success alert
+                    // Reload the DataTable after deleting a component
+                    //$('#componentTable').DataTable().ajax.reload();
+                    window.location.href = '/DprComponent/Index';
+                } else {
+                    alert(data.message);  // Show error alert
+                }
+            });
+        }
+    }
+
+    function cancelUpdate() {
+        // Reset the form and buttons
+        $("#componentName").val("");
+        $("#addComponentBtn").text("Add").unbind("click").click(addComponent);
+        $("#cancelBtn").hide();
+    }
+
+    // Add your logic for editComponent and deleteComponent functions
+</script>

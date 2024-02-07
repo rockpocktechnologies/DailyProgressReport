@@ -1,0 +1,93 @@
+﻿@model List<ProjectViewModel>
+
+<div id="projectListContainer" class="container mt-4">
+    <h6 class="text-center mb-4">Project List</h6>
+
+    <table id="projectListTable" class="table">
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Short Name</th>
+                <th>Project Code</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Revised Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>@project.ProjectName</td>
+                    <td>@project.ProjectShortName</td>
+                    <td>@project.ProjectCode</td>
+                    <td>@project.ProjectStartDate</td>
+                    <td>@project.ProjectEndDate</td>
+                    <td>@project.ProjectRevisedDate</td>
+                    <td>
+                @* <i class="fas @((project.IsActive ? "fa-toggle-on text-success" : "fa-toggle-off text-secondary")) toggle-icon"
+                onclick="toggleProjectStatus(@project.ProjectID,this)"
+                data-toggle="tooltip"
+                data-isactive="@project.IsActive"
+                data-placement="top"
+                title="@((project.IsActive ? "Deactivate Project" : "Activate Project"))">
+                </i> *@
+                </td> 
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+<script>
+    $(document).ready(function () {
+        $('#projectListTable').DataTable({
+            // DataTable configuration
+        });
+
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    function toggleProjectStatus(projectId, control) {
+        var isactive = $(control).attr("data-isactive");
+        var msg = "";
+        if (isactive == "True") {
+            msg = "Are you sure you want to deactivate the project?";
+        }
+        else {
+            msg = "Are you sure you want to activate the project?";
+        }
+        // Display a confirmation dialog
+        if (confirm(msg)) {
+            // Call the controller action to toggle the project status
+            $.ajax({
+                url: '/ProjectList/ToggleProjectStatus',
+                type: 'POST',
+                data: { projectId: projectId },
+                success: function (result) {
+                    // Handle success (you can customize this as needed)
+                    if (result.success) {
+                        // Reload the page or update the UI as needed
+                        location.reload();
+                    } else {
+                        alert("Failed to toggle project status. Please try again.");
+                    }
+                },
+                error: function () {
+                    // Handle error (you can customize this as needed)
+                    alert("An error occurred while toggling project status.");
+                }
+            });
+        }
+    }
+</script>
+

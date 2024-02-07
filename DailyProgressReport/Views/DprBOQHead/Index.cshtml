@@ -1,0 +1,184 @@
+﻿@model DailyProgressReport.Models.ShowBOQHeads
+
+@{
+    ViewData["Title"] = "BOQ Head";
+}
+
+<div id="addBOQHeadContainer" class="container mt-4">
+  @*  <h3 class="text-center mb-4">Add BOQ Head</h3>*@
+    <form style="text-align: center;">
+
+        <div class="form-group">
+            <h6 class="mb-4">Project:</h6>
+            <select id="projectId" name="projectId" class="form-control">
+                <option value="">Please Select</option>
+                @foreach (var project in Model.projects)
+                {
+                    <option value="@project.ProjectID">@project.ProjectName</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <h6 class="mb-4">BOQ Head Name:</h6>
+            <input type="text" id="boqHeadName" name="boqHeadName" class="form-control" placeholder="Enter BOQ Head Name">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button id="btnAddBOQHead" type="button" class="btn btn-danger" onclick="addBOQHead()">Add</button>
+            <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
+        </div>
+    </form>
+
+    <br />
+
+    <div id="existingBOQHeadListContainer" class="container mt-4">
+      @*  <h6 class="text-center mb-4">BOQ Head List</h6>*@
+        <!-- Use the design for the project list -->
+       @* <div class="mb-3">
+            <input type="text" id="boqHeadSearch" class="form-control" placeholder="Search BOQ Head">
+        </div>*@
+        <table id="boqHeadTable" class="table">
+            <thead>
+                <tr>
+                       <th>ID</th>
+                       <th>BOQ Head Name</th>
+                       <th>Created By</th>
+                       <th>Created Date</th>
+                       <th>Updated By</th>
+                    <th>Updated Date</th>
+                  
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var BOQ in Model.boq)
+                {
+                    <tr>
+                        <td>@BOQ.Id</td>
+                        <td>@BOQ.BOQHeadName</td>
+                        <td>@BOQ.CreatedBy</td>
+                        <td>@BOQ.CreatedDate</td>
+                        <td>@BOQ.UpdatedBy</td>
+                        <td>@BOQ.UpdatedDate</td>
+                        <td>
+                            <i class="edit-icon" onclick="editBOQHead('@BOQ.Id','@BOQ.BOQHeadName')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+                            </i>
+
+                            <i class="delete-icon" onclick="deleteBOQHead('@BOQ.Id')">
+                                <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
+                            </i>
+                        
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@*<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+*@
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable for the BOQ Head table
+            $('#boqHeadTable').DataTable({
+                "columnDefs": [
+                    { "targets": [0], "orderable": false },
+                    { "targets": [1], "orderable": false }
+                ],
+                "order": [[0, "asc"]]
+            });
+        });
+
+    function addBOQHead() {
+        var boqHeadName = $("#boqHeadName").val();
+
+        if (boqHeadName !== "") {
+            // Use AJAX to call the controller action for adding a BOQ Head
+            $.post('@Url.Action("AddBOQHead", "DprBOQHead")', { boqHeadName: boqHeadName }, function (data) {
+                if (data.success) {
+                    alert(data.message);  // Show success alert
+                    // Optionally, clear the form field
+                    $("#boqHeadName").val("");
+                    // Optionally, hide the Add BOQ Head section
+                    $("#addBOQHeadContainer").hide();
+                    // Show the BOQ Head List section
+                    $("#existingBOQHeadListContainer").show();
+                    // Reload the DataTable after adding a BOQ Head
+                    ReloadBOQHeadPage();
+                } else {
+                    alert(data.message);  // Show error alert
+                }
+            });
+        } else {
+            alert("Please add BOQ Head name");
+        }
+    }
+
+    function showBOQHeadList() {
+        // Hide the Add BOQ Head section
+        $("#addBOQHeadContainer").hide();
+        // Show the BOQ Head List section
+        $("#existingBOQHeadListContainer").show();
+    }
+
+    function editBOQHead(id, boqHeadName) {
+        // Fill the BOQ Head name in the text box
+        $("#boqHeadName").val(boqHeadName);
+        // Change the button text and bind the update function
+        $("#btnAddBOQHead").removeAttr("onclick");
+        $("#btnAddBOQHead").text("Update").click(function () {
+            updateBOQHead(id);
+        });
+    }
+
+    function updateBOQHead(id) {
+        var boqHeadName = $("#boqHeadName").val();
+
+        if (boqHeadName !== "") {
+            // Use AJAX to call the controller action for updating a BOQ Head
+            $.post('@Url.Action("UpdateBOQHead", "DprBOQHead")', { id: id, boqHeadName: boqHeadName }, function (data) {
+                if (data.success) {
+                    alert(data.message);  // Show success alert
+                    // Reload the DataTable after updating a BOQ Head
+                    ReloadBOQHeadPage();
+                } else {
+                    alert(data.message);  // Show error alert
+                }
+            });
+        } else {
+            alert("Please add BOQ Head name");
+        }
+    }
+
+    function deleteBOQHead(id, boqHeadName) {
+        if (confirm("Are you sure you want to delete this BOQ Head?")) {
+            // Use AJAX to call the controller action for deleting a BOQ Head
+            $.post('@Url.Action("DeleteBOQHead", "DprBOQHead")', { id: id }, function (data) {
+                if (data.success) {
+                    alert(data.message);  // Show success alert
+                    // Reload the DataTable after deleting a BOQ Head
+                    ReloadBOQHeadPage();
+                } else {
+                    alert(data.message);  // Show error alert
+                }
+            });
+        }
+    }
+
+    function openaddMastersContainer() {
+        window.location.href = '/AddMaster/Index';
+    }
+
+     function ReloadBOQHeadPage(){
+        window.location.href = '/DprBOQHead/Index';
+    }
+    </script>

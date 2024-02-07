@@ -1,0 +1,34 @@
+﻿@model List<ErrorLogViewModel>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error Log</title>
+</head>
+<body>
+    <h1>Error Log</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Log Time</th>
+                <th>Error Message</th>
+                <th>Stack Trace</th>
+                <th>Additional Info</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var errorLog in Model)
+            {
+                <tr>
+                    <td>@errorLog.Id</td>
+                    <td>@errorLog.LogTime</td>
+                    <td>@errorLog.ErrorMessage</td>
+                    <td>@errorLog.StackTrace</td>
+                    <td>@errorLog.AdditionalInfo</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

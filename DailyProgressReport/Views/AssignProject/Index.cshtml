@@ -1,0 +1,244 @@
+﻿ @model DailyProgressReport.ProjectViewModel
+ 
+<div id="assignProjectsContainer" class="container mt-4" 
+style="max-width: 800px;width:80%; margin: 20px auto; text-align: center;">
+
+    <form style="text-align: center;">
+        <div class="form-group">
+            <h6 for="projectDropdown">Select Project:</h6>
+           @* <select id="projectDropdown" name="projectDropdown" class="form-control">
+                <option value="">Please Select</option>
+               
+            </select>*@
+            @Html.DropDownListFor(model => model.ProjectID, (SelectList)ViewBag.ProjectsData, new { @class = "form-control", id = "projectDropdown" })
+        </div>
+        <br />
+        <div class="form-group">
+            <h6 for="adminName">Admin Name:</h6>
+            <input type="text" id="adminName" name="adminName" class="form-control" placeholder="Type to search">
+        </div>
+        <div id="selectedAdmins" class="mt-2">
+            <!-- Display selected admins as pills -->
+        </div>
+        <br />
+        <button type="button" id="assignButton" class="btn btn-danger">Assign</button>
+    </form>
+    <br />
+    <br />
+@*    <h3 class="text-center mb-4">Assignment History</h3>
+*@
+    <table id="assignmentHistoryTable" class="table" style="width: 800px !important;">
+        <thead>
+            <tr>
+               
+                <th>Project Name</th>
+                <th>Admin</th>
+                <th>Assignment Date</th>
+            </tr>
+        </thead>
+        <tbody>
+           
+        </tbody>
+    </table>
+
+</div>
+@*<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+*@
+<script>
+    $(document).ready(function () {
+
+        $("#adminName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/AssignProject/GetAdminNames',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { term: request.term },
+                    success: function (data) {
+                        if(data !== undefined && data.length > 0){
+                        // Map the data to the required format for autocomplete
+                        var mappedData = $.map(data, function (item) {
+                            return {
+                                label: item.userId,
+                                value: item.userId
+                            };
+                        });
+
+                        // Call response with the mapped data
+                        response(mappedData);
+                        }
+                        else{
+                             alert('No user found.');
+                        }
+                    },
+                    error: function () {
+                        alert('Error fetching admin names.');
+                    }
+                });
+            },
+            select: function (event, ui) {
+                // Handle the selection of an admin from autocomplete
+                addAdminPill(ui.item.label, ui.item.value);
+                // Clear the input after selection
+                $("#adminName").val('');
+                return false; // Prevent the widget from inserting the value into the input
+            },
+            // Display the label property in the autocomplete dropdown
+            focus: function (event, ui) {
+                $("#adminName").val(ui.item.label);
+                return false;
+            }
+        });
+
+
+
+        //var adminData = [
+        //    { label: "sanjay.codescreators", value: 1 },
+        //    { label: "Admin 2", value: 2 },
+        //    { label: "Admin 3", value: 3 },
+        //    { label: "Admin 4", value: 4 },
+        //    { label: "Admin 5", value: 5 }
+        //];
+
+        //$("#adminName").autocomplete({
+        //    source: adminData,
+        //    select: function (event, ui) {
+        //        // Handle the selection of an admin from autocomplete
+        //        addAdminPill(ui.item.label, ui.item.value);
+        //        // Clear the input after selection
+        //        $("#adminName").val('');
+        //        return false; // Prevent the widget from inserting the value into the input
+        //    },
+        //    // Display the label property in the autocomplete dropdown
+        //    focus: function (event, ui) {
+        //        $("#adminName").val(ui.item.label);
+        //        return false;
+        //    }
+        //});
+    });
+
+    function addAdminPill(adminName, adminId) {
+        // Add the selected admin as a pill
+        var pill = '<span class="badge badge-pill badge-secondary mr-2">' + adminName +
+            '<button type="button" class="close" aria-label="Close" data-admin-id="' + adminName + '" onclick="removeAdminPill(this)">' +
+            '<span aria-hidden="true">&times;</span></button></span>';
+        $("#selectedAdmins").append(pill);
+    }
+
+    function removeAdminPill(button) {
+        // Retrieve the associated Admin ID from the data-admin-id attribute
+        var adminId = $(button).data('admin-id');
+        // Remove the admin pill
+        $(button).parent().remove();
+    }
+
+    function assignProject() {
+        // Add your logic to handle the assignment here
+        var selectedProject = $("#projectDropdown").val();
+        var selectedAdmins = getSelectedAdmins();
+
+        // Example: Use alert to display the selected values
+        alert("Selected Project: " + selectedProject + "\nSelected Admins: " + selectedAdmins.join(','));
+
+        // Add AJAX request to send data to the server for processing
+        // $.ajax({
+        //     url: '/YourController/YourAction',
+        //     type: 'POST',
+        //     data: { project: selectedProject, admins: selectedAdmins },
+        //     success: function (result) {
+        //         // Handle success
+        //     },
+        //     error: function (error) {
+        //         // Handle error
+        //     }
+        // });
+    }
+
+    $(document).ready(function () {
+        // ... Your existing autocomplete code
+
+        $("#assignButton").on("click", function () {
+            assignProject();
+        });
+    });
+
+    function assignProject() {
+        var selectedProject = $("#projectDropdown").val();
+        var selectedAdmins = getSelectedAdmins();
+
+        // Validate if both project and admins are selected
+        if (!selectedProject || selectedAdmins.length === 0) {
+            alert("Please select a project and at least one admin.");
+            return;
+        }
+
+        // Use AJAX to send data to the server for processing
+        $.ajax({
+            url: '/AssignProject/AssignProject', // Update the URL to match your controller action
+            type: 'POST',
+            data: { projectId: selectedProject, adminIds: selectedAdmins },
+            success: function (result) {
+                // Handle success
+                alert("Project assigned successfully!");
+                // Optionally, you can perform additional actions after successful assignment
+                location.reload(); // For example, reload the page
+            },
+            error: function (error) {
+                console.error('Error assigning project:', error);
+                alert('Error assigning project: ' + error.responseText);
+            }
+        });
+    }
+
+    function getSelectedAdmins() {
+        // Retrieve the selected admin IDs from pills
+        var selectedAdmins = [];
+        $("#selectedAdmins .badge-pill").each(function () {
+            selectedAdmins.push($(this).find('.close').data('admin-id'));
+        });
+        return selectedAdmins;
+    }
+
+    $(document).ready(function () {
+        // Fetch assignment history data using AJAX
+        $.ajax({
+            url: '/AssignProject/AssignmentHistory',
+            method: 'GET',
+            success: function (data) {
+                // Initialize DataTables when the data is available
+                initializeDataTables(data);
+            },
+            error: function (xhr, error, thrown) {
+                console.log('Error fetching assignment history:', error, thrown);
+                alert('Error fetching assignment history. Please check the console for details.');
+            }
+        });
+    });
+
+    // Function to initialize DataTables with the provided data
+    function initializeDataTables(data) {
+        $('#assignmentHistoryTable').DataTable({
+            data: data,
+            columns: [
+                { data: 'projectName' },
+                { data: 'adminName' },
+                { data: 'assignmentDate' }
+            ],
+            deferRender: true,  // Defer rendering until the data is available
+            error: function (xhr, error, thrown) {
+                console.log('DataTables error:', error, thrown);
+                alert('DataTables error: Unable to render assignment history.');
+            }
+        });
+    }
+
+
+
+
+</script>

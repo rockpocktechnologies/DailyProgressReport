@@ -1,0 +1,772 @@
+﻿
+@model ShowBoqReferences    // modelList
+
+@{
+
+    ViewData["Title"] = "Activity Code";
+
+}
+
+<style>
+
+    body {
+        font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    #addBOQReferenceContainer,
+    #existingBOQReferenceCodeListContainer {
+        margin-top: 15px;
+    }
+
+    form {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    .btn {
+        margin-right: 10px;
+    }
+
+    .edit-icon,
+    .delete-icon {
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+</style>
+
+<div id="addBOQReferenceContainer" class="container mt-4">
+
+    <h3 class="text-center mb-4">Add BOQ Reference</h3>
+
+    <form style="text-align: center; margin-left: 225px">
+
+        <table class="form-table">
+
+            <tr>
+
+                <th>BOQ Head</th>
+
+                <td>
+
+                    <select id="boqReferenceHead" class="form-control">
+
+                        <option value="">Please Select</option>
+
+                        @foreach (var head in Model.BoqHeads)
+
+                        {
+
+                            <option value="@head.Id">@head.BOQHeadName</option>
+
+                        }
+
+                    </select>
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <th>BOQ No</th>
+
+                <td>
+
+                    <input type="text" id="boqReference" name="boqReference" class="form-control" placeholder="Enter BOQ No.">
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <th>WBS Number</th>
+
+                <td>
+
+                    <input type="text" id="boqWBSnO" name="boqWBSnO" class="form-control" placeholder="WBS Number.">
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <th>BOQ Description</th>
+
+                <td>
+
+                    <input type="text" id="BOQDescription" name="BOQDescription" class="form-control" placeholder="BOQ Description.">
+
+                </td>
+
+            </tr>
+
+
+            @* <tr>
+
+            <th>Activity</th>
+
+            <td>
+
+            <input type="text" id="BOQActivity" name="BOQActivity" class="form-control" placeholder="Activity.">
+
+            </td>
+
+            </tr>*@
+
+
+            <tr>
+
+                <th>Unit Of Measurement</th>
+
+                <td>
+
+                    <input type="text" id="UOM" name="UOM" class="form-control" placeholder="Unit Of Measurement.">
+
+                </td>
+
+            </tr>
+
+
+            @* <tr>
+
+            <th>Length(M)</th>
+
+            <td>
+
+            <input type="number" id="pipe" name="pipe" class="form-control" placeholder="Enter Length">
+
+            </td>
+
+            </tr>*@
+
+
+
+            <tr>
+
+                <th>Group Code</th>
+
+                <td>
+
+                    <select id="boqReferenceGroup" class="form-control">
+
+                        <option value="">Please Select</option>
+
+                        @foreach (var head in Model.Group)
+
+                        {
+
+                            <option value="@head.Id">@head.GroupCode</option>
+
+                        }
+
+                    </select>
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <th>Activity Code</th>
+
+                <td>
+
+                    <select id="boqReferenceActivity" class="form-control">
+
+                        <option value="">Please Select</option>
+
+                        @foreach (var head in Model.Activity)
+
+                        {
+
+                            <option value="@head.Id">@head.ActivityCode</option>
+
+                        }
+
+                    </select>
+
+                </td>
+
+            </tr>
+
+
+
+            <tr>
+
+                <th>Quantity</th>
+
+                <td>
+
+                    <input type="number" id="designQuantity" name="designQuantity" class="form-control" placeholder="Enter Design Quantity">
+
+                </td>
+
+            </tr>
+
+
+            <tr>
+
+                <th></th>
+
+                <td>
+
+                    <button id="btnAddBOQReference" type="button" class="btn btn-danger" onclick="addBOQReference()">Add</button>
+
+                    @*
+
+                    <button id="btnAddBOQReference" type="button" class="btn btn-danger" onclick="addBOQReferenc()">Add</button> *@
+
+                    <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
+
+                </td>
+
+            </tr>
+
+        </table>
+
+    </form>
+
+    <div id="existingBOQReferenceCodeListContainer" class="container mt-4">
+
+        @*     <h6 class="text-center mb-4">Group Code List</h6> *@
+
+        <!-- Use the design for the project list -->
+
+        <table id="BOQTableTable" class="table">
+
+            <thead>
+
+                <tr>
+
+                    @*
+
+                    <th >ID</th> *@
+
+                    <th style="display: none;">ID</th><!-- Hide the ID column -->
+
+                    <th>BOQHead</th>
+
+                    <th>BOQNo</th>
+
+                    <th>WBSNumber</th>
+
+                    <th>BOQDescription</th>
+
+                    <th>UOM</th>
+
+                    @*     <th>Length</th> *@
+
+                    <th>GroupCode</th>
+
+                    <th>ActivityCode</th>
+
+                    <th>DesignQuantity</th>
+
+                    <th>CreatedDate</th>
+
+                    <th>CreatedBy</th>
+
+                    <th>UpdatedDate</th>
+
+                    <th>UpdatedBy</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var BOQReference in Model.BoqReferences)
+
+                {
+
+                    <tr>
+
+                        <td style="display: none;">@BOQReference.Id</td> <!-- Hide the ID value -->
+                        @*    <td>@BOQReference.Id</td> <!-- Hide the ID value --> *@
+
+                        <td>@BOQReference.BOQHead</td>
+
+                        <td>@BOQReference.BOQNo</td>
+
+                        <td>@BOQReference.WBSNumber</td>
+
+                        <td>@BOQReference.BOQDescription</td>
+
+                        <td>@BOQReference.UOM</td>
+
+                        @*      <td>@BOQReference.Length</td> *@
+
+                        <td>@BOQReference.GroupCode</td>
+
+                        <td>@BOQReference.ActivityCode</td>
+
+                        <td>@BOQReference.DesignQuantity</td>
+
+                        <td>@BOQReference.CreatedDate</td>
+
+                        <td>@BOQReference.CreatedBy</td>
+
+                        <td>@BOQReference.UpdatedDate</td>
+
+                        <td>@BOQReference.UpdatedBy</td>
+
+                        <td>
+
+                            <i class="edit-icon" onclick="editBOQReference('@BOQReference.Id','@BOQReference.BOQHead','@BOQReference.BOQNo','@BOQReference.WBSNumber','@BOQReference.BOQDescription','@BOQReference.UOM','@BOQReference.GroupCode','@BOQReference.ActivityCode','@BOQReference.DesignQuantity')">
+
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+
+                            </i>
+
+                            <i class="delete-icon" onclick="deleteBOQReference('@BOQReference.Id')">
+
+                                <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
+
+                            </i>
+
+                        </td>
+
+                    </tr>
+
+                }
+
+            </tbody>
+
+        </table>
+
+
+
+    </div>
+
+
+    <script src="C:\Users\OMKAR\Downloads\DailyProgressReport\DailyProgressReport\DailyProgressReport\wwwroot\js\BOQ.js"></script>
+
+    <script>"C:\Users\OMKAR\Downloads\DailyProgressReport\DailyProgressReport\DailyProgressReport\wwwroot\js\BOQ.js"</script>
+
+    @*<script src="https://code.jquery.com/jquery-3.1.1.min.js"> </script>
+
+    <!-- Include DataTables library and initialization script -->
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    *@
+
+    <script>
+
+        // var jq = jQuery.noConflict();
+
+        // console.log(jq.fn.jquery); // Check jQuery version in the console
+
+        // jq(document).ready(function () {
+
+        //     // Initialize DataTable for the BOQ reference table
+
+        //     jq('#BOQTableTable').DataTable();
+
+        // });
+
+        // $(document).ready(function () {
+
+        //     // Initialize DataTable for the BOQ reference table
+
+        //     $('#boqReferenceTable').DataTable();
+
+        // });
+
+        $(document).ready(function () {
+
+            $('#BOQTableTable').DataTable({
+
+                "order": [[0, "desc"]] // Sort the first column (index 0) in descending order
+
+            });
+
+        });
+
+
+
+        // Add Function
+
+
+
+        function addBOQReference() {
+
+            var boqHead = $("#boqReferenceHead").val();
+
+            var boqNo = $("#boqReference").val();
+
+            var wbsNumber = $("#boqWBSnO").val();
+
+            var boqDescription = $("#BOQDescription").val();
+
+            var uom = $("#UOM").val();
+
+            var groupCode = $("#boqReferenceGroup").val();
+
+            var activityCode = $("#boqReferenceActivity").val();
+
+            var designQuantity = $("#designQuantity").val();
+
+            // Check if any required field is empty
+
+            if (boqHead.trim() === "" || boqNo.trim() === "" || wbsNumber.trim() === "" || boqDescription.trim() === "" || uom.trim() === "" || groupCode.trim() === "" || activityCode.trim() === "" || designQuantity.trim() === "") {
+
+                alert("Please fill in all fields."); // Show popup message
+
+                return; // Exit the function without proceeding further
+
+            }
+
+            // If all fields are filled, proceed with the AJAX request
+
+            $.ajax({
+
+                type: "POST",
+
+                url: "/DprBOQReference/AddBOQReference", // Update the URL to match your controller action
+
+                data: {
+
+                    BOQHead: boqHead,
+
+                    BOQNo: boqNo,
+
+                    WBSNumber: wbsNumber,
+
+                    BOQDescription: boqDescription,
+
+                    UOM: uom,
+
+                    GroupCode: groupCode,
+
+                    ActivityCode: activityCode,
+
+                    DesignQuantity: designQuantity
+
+                },
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        // Display success message
+
+                        $("#message").html('<div class="alert alert-success">' + response.message + '</div>');
+
+                        // Clear the form
+
+                        $("#boqReferenceHead").val('');
+
+                        $("#boqReference").val('');
+
+                        $("#boqWBSnO").val('');
+
+                        $("#BOQDescription").val('');
+
+                        $("#UOM").val('');
+
+                        $("#boqReferenceGroup").val('');
+
+                        $("#boqReferenceActivity").val('');
+
+                        $("#designQuantity").val('');
+
+                        // Reload the DataTable (if applicable)
+
+                        ReloadBOQRefPage();
+
+                        refreshPage();
+
+                        ReloadDataTable();
+
+                    } else {
+
+                        // Display error message
+
+                        $("#message").html('<div class="alert alert-danger">' + response.message + '</div>');
+
+                    }
+
+                },
+
+                error: function (xhr, textStatus, errorThrown) {
+
+                    // Display error message
+
+                    $("#message").html('<div class="alert alert-danger">Error: ' + errorThrown + '</div>');
+
+                }
+
+            });
+
+        }
+
+
+
+
+
+        function ReloadDataTable() {
+
+            // Reload or redraw your DataTable
+
+            $('#BOQTableTable').DataTable().ajax.reload();
+
+        }
+
+
+        // Edit function
+
+
+        function showBOQReferenceList() {
+
+            // Hide the Add BOQ Reference section
+
+            $("#addBOQReferenceContainer").hide();
+
+            // Show the Existing BOQ Reference List section
+
+            $("#existingBOQReferenceCodeListContainer").show();
+
+        }
+
+
+        function editBOQReference(id, BOQHead, BOQNo, WBSNumber, BOQDescription, UOM, GroupCode, ActivityCode, DesignQuantity) {
+
+            // Fill the form fields with the corresponding values
+
+            $("#boqReferenceHead").val(BOQHead);
+
+            $("#boqReference").val(BOQNo);
+
+            $("#boqWBSnO").val(WBSNumber);
+
+            $("#BOQDescription").val(BOQDescription);
+
+            $("#UOM").val(UOM);
+
+            $("#boqReferenceGroup").val(GroupCode);
+
+            $("#boqReferenceActivity").val(ActivityCode);
+
+            $("#designQuantity").val(DesignQuantity);
+
+            // Change the button text and bind the update function
+
+            $("#btnAddBOQReference").removeAttr("onclick");
+
+            $("#btnAddBOQReference").text("Update").click(function () {
+
+                UpdateBOQReference(id);
+
+            });
+
+        }
+
+
+        // Update Function
+
+        function UpdateBOQReference(id) {
+
+            var boqHead = $("#boqReferenceHead").val();
+
+            var boqNo = $("#boqReference").val();
+
+            var wbsNumber = $("#boqWBSnO").val();
+
+            var boqDescription = $("#BOQDescription").val();
+
+            var uom = $("#UOM").val();
+
+            var groupCode = $("#boqReferenceGroup").val();
+
+            var activityCode = $("#boqReferenceActivity").val();
+
+            var designQuantity = $("#designQuantity").val();
+
+            if (boqHead !== "" && boqNo !== "" && wbsNumber !== "" && boqDescription !== "" && uom !== "" && groupCode !== "" && activityCode !== "" && designQuantity !== "") {
+
+                // Use AJAX to call the controller action for updating a BOQ Reference
+
+                $.post('@Url.Action("UpdateBOQReference", "DprBOQReference")', {
+
+                    id: id,
+
+                    boqHead: boqHead,
+
+                    boqNo: boqNo,
+
+                    wbsNumber: wbsNumber,
+
+                    boqDescription: boqDescription,
+
+                    uom: uom,
+
+                    groupCode: groupCode,
+
+                    activityCode: activityCode,
+
+                    designQuantity: designQuantity
+
+                }, function (data) {
+
+                    if (data.success) {
+
+                        alert(data.message);  // Show success alert
+
+                        // Reload the DataTable after updating a BOQ Reference
+
+                        ReloadBOQRefPage();
+
+                    } else {
+
+                        alert(data.message);  // Show error alert
+
+                    }
+
+                });
+
+            } else {
+
+                alert("Please fill in all fields");
+
+            }
+
+        }
+
+
+        // Delete Function
+
+
+        function deleteBOQReference(id) {
+
+            // Use AJAX to delete BOQ Reference
+
+            $.ajax({
+
+                url: '@Url.Action("DeleteBOQReference", "DprBOQReference")',
+
+                type: 'POST',
+
+                data: { id: id },
+
+                success: function (data) {
+
+                    if (data.success) {
+
+                        alert(data.message);
+
+                        // Reload the DataTable
+
+                        ReloadBOQRefPage();
+
+                    } else {
+
+                        alert(data.message);
+
+                    }
+
+                },
+
+                error: function () {
+
+                    alert('Error deleting BOQ Reference.');
+
+                }
+
+            });
+
+        }
+
+
+
+
+        function openaddMastersContainer() {
+
+            window.location.href = '/AddMaster/Index';
+
+        }
+
+
+        function ReloadDataTable() {
+
+            // Reload or redraw your DataTable
+
+            $('#BOQTableTable').DataTable().ajax.reload();
+
+        }
+
+        function ReloadBOQRefPage() {
+
+            window.location.href = '/DprBOQReference/Index';
+
+        }
+
+        function refreshPage() {
+
+            window.location.reload(true);
+
+        }
+
+
+        function infiniteRecursion() {
+
+            infiniteRecursion(); // This call creates an infinite loop
+
+        }
+
+
+        // Corrected example with a termination condition
+
+        function recursiveFunction(count) {
+
+            if (count <= 0) {
+
+                return;
+
+            }
+
+            console.log(count);
+
+            recursiveFunction(count - 1);
+
+        }
+
+
+
+    </script>

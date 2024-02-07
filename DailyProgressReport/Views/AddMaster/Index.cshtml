@@ -1,0 +1,55 @@
+﻿@model DailyProgressReport.Models.Master
+
+@{
+    ViewData["Title"] = "Add Master";
+}
+
+<div id="addMastersContainer" style="text-align: center;">
+    <div style="text-align: center;">
+        <div class="form-group">
+            <h6 class="mb-4">Select Master Type:</h6>
+            <select id="masterType" name="masterType" class="form-control">
+                <option value="">Please Select</option>
+                @foreach (var masterType in ViewBag.MasterTypes)
+                {
+                    <option value="@masterType.Name">@masterType.Name</option>
+                }
+            </select>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button type="button" class="btn btn-danger" onclick="onOkButtonClick()">OK</button>
+@*            <button type="button" class="btn btn-secondary" onclick="cancelMaster()">Cancel</button>
+*@        </div>
+    </div>
+</div>
+
+    <script>
+        function onOkButtonClick() {
+        var selectedval = $("#masterType").val();
+        if (selectedval == ""){
+            alert("Please select master.");
+        }
+        else if (selectedval == "Component"){
+            window.location.href = '/DprComponent/Index';
+        }
+        else if (selectedval == "Block") {
+            window.location.href = '/DprBlock/Index';
+        }
+        else if (selectedval == "Location") {
+            window.location.href = '/DprLocation/Index';
+        }
+        else if (selectedval == "VillageName") {
+            window.location.href = '/DprVillage/Index';
+        }
+        else if (selectedval == "BOQHead") {
+            window.location.href = '/DprBOQHead/Index';
+        }
+        else if (selectedval == "BOQReference") {
+            window.location.href = '/DprBOQReference/Index';
+        }
+        }
+
+        function cancelMaster() {
+        }
+    </script>

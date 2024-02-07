@@ -1,0 +1,275 @@
+﻿@* @model DailyProgressReport.ProjectViewModel
+ *@@* @model DailyProgressReport.PlanningManagerModel
+ *@
+@* @model PlanningManagerModel
+ *@
+ @model ShowPlanningModel
+<div id="assignProjectsContainer" class="container mt-4"
+     style="max-width: 800px;width:80%; margin: 20px auto; text-align: center;">
+
+    <form style="text-align: center;">
+        <div class="form-group">
+            <h6 for="projectDropdown">Select Project:</h6>
+           
+            @Html.DropDownListFor(model => model.projects, (SelectList)ViewBag.ProjectsData, new { @class = "form-control", id = "projectDropdown" })
+        </div>
+        <br />
+        <div class="form-group">
+            <h6 for="siteengineerName">Site Engineer Name:</h6>
+            <input type="text" id="siteengineerName" name="siteengineerName" class="form-control" placeholder="Type to search">
+        </div>
+        <div id="selectedsiteengineers" class="mt-2">
+            <!-- Display selected siteengineers as pills -->
+        </div>
+        <br />
+        <button type="button" id="assignButton" class="btn btn-danger">Assign</button>
+    </form>
+    <br />
+    <br />
+    @*    <h3 class="text-center mb-4">Assignment History</h3>
+    *@
+    <table id="assignmentHistoryTable" class="table" style="width: 800px !important;">
+        <thead>
+            <tr>
+                 <th>Project Name</th>
+                <th>Site Engineer Name</th>
+                 
+             </tr>
+        </thead>
+        <tbody>
+              @foreach (var Planning in Model.Planning)
+            {
+                <tr>
+                    <td>@Planning.Projects</td>
+                    <td>@Planning.SiteEngineerName</td>
+                    <td>
+                         @* <i class="edit-icon" onclick="editPlanning(@Planning.ProjectId)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+                        </i>
+
+                        <i class="delete-icon" onclick="DeletePlanning(@Planning.ProjectId)">
+                            <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
+                        </i>  *@
+                     </td>
+                </tr> 
+            }
+        </tbody>
+    </table>
+
+</div>
+ <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        $("#siteengineerName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/AssignProject/GetAdminNames',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { term: request.term },
+                    success: function (data) {
+                        if (data !== undefined && data.length > 0) {
+                            // Map the data to the required format for autocomplete
+                            var mappedData = $.map(data, function (item) {
+                                return {
+                                    label: item.userId,
+                                    value: item.userId
+                                };
+                            });
+
+                            // Call response with the mapped data
+                            response(mappedData);
+                        }
+                        else {
+                            alert('No user found.');
+                        }
+                    },
+                    error: function () {
+                        alert('Error fetching siteengineer names.');
+                    }
+                });
+            },
+            select: function (event, ui) {
+                // Handle the selection of an siteengineer from autocomplete
+                addsiteengineerPill(ui.item.label, ui.item.value);
+                // Clear the input after selection
+                $("#siteengineerName").val('');
+                return false; // Prevent the widget from inserting the value into the input
+            },
+            // Display the label property in the autocomplete dropdown
+            focus: function (event, ui) {
+                $("#siteengineerName").val(ui.item.label);
+                return false;
+            }
+        });
+
+
+
+        //var siteengineerData = [
+        //    { label: "sanjay.codescreators", value: 1 },
+        //    { label: "siteengineer 2", value: 2 },
+        //    { label: "siteengineer 3", value: 3 },
+        //    { label: "siteengineer 4", value: 4 },
+        //    { label: "siteengineer 5", value: 5 }
+        //];
+
+        //$("#siteengineerName").autocomplete({
+        //    source: siteengineerData,
+        //    select: function (event, ui) {
+        //        // Handle the selection of an siteengineer from autocomplete
+        //        addsiteengineerPill(ui.item.label, ui.item.value);
+        //        // Clear the input after selection
+        //        $("#siteengineerName").val('');
+        //        return false; // Prevent the widget from inserting the value into the input
+        //    },
+        //    // Display the label property in the autocomplete dropdown
+        //    focus: function (event, ui) {
+        //        $("#siteengineerName").val(ui.item.label);
+        //        return false;
+        //    }
+        //});
+    });
+
+    function addsiteengineerPill(siteengineerName, siteengineerId) {
+        // Add the selected siteengineer as a pill
+        var pill = '<span class="badge badge-pill badge-secondary mr-2">' + siteengineerName +
+            '<button type="button" class="close" aria-label="Close" data-siteengineer-id="' + siteengineerName + '" onclick="removesiteengineerPill(this)">' +
+            '<span aria-hidden="true">&times;</span></button></span>';
+        $("#selectedsiteengineers").append(pill);
+    }
+
+    function removesiteengineerPill(button) {
+        // Retrieve the associated siteengineer ID from the data-siteengineer-id attribute
+        var siteengineerId = $(button).data('siteengineer-id');
+        // Remove the siteengineer pill
+        $(button).parent().remove();
+    }
+
+    function assignProject() {
+        // Add your logic to handle the assignment here
+        var selectedProject = $("#projectDropdown").val();
+        var selectedsiteengineers = getSelectedsiteengineers();
+
+        // Example: Use alert to display the selected values
+        alert("Selected Project: " + selectedProject + "\nSelected siteengineers: " + selectedsiteengineers.join(','));
+
+        // Add AJAX request to send data to the server for processing
+        // $.ajax({
+        //     url: '/YourController/YourAction',
+        //     type: 'POST',
+        //     data: { project: selectedProject, siteengineers: selectedsiteengineers },
+        //     success: function (result) {
+        //         // Handle success
+        //     },
+        //     error: function (error) {
+        //         // Handle error
+        //     }
+        // });
+    }
+
+    $(document).ready(function () {
+        // ... Your existing autocomplete code
+
+        $("#assignButton").on("click", function () {
+            assignProject();
+        });
+    });
+
+    function assignProject() {
+        var selectedProject = $("#projectDropdown").val();
+        var selectedsiteengineers = getSelectedsiteengineers();
+
+        // Validate if both project and siteengineers are selected
+        if (!selectedProject || selectedsiteengineers.length === 0) {
+            alert("Please select a project and at least one siteengineer.");
+            return;
+        }
+
+        // Use AJAX to send data to the server for processing
+        $.ajax({
+            url: '/AssignProject/AssignProject', // Update the URL to match your controller action
+            type: 'POST',
+            data: { projectId: selectedProject, siteengineerIds: selectedsiteengineers },
+            success: function (result) {
+                // Handle success
+                alert("Project assigned successfully!");
+                // Optionally, you can perform additional actions after successful assignment
+                location.reload(); // For example, reload the page
+            },
+            error: function (error) {
+                console.error('Error assigning project:', error);
+                alert('Error assigning project: ' + error.responseText);
+            }
+        });
+    }
+
+    function getSelectedsiteengineers() {
+        // Retrieve the selected siteengineer IDs from pills
+        var selectedsiteengineers = [];
+        $("#selectedsiteengineers .badge-pill").each(function () {
+            selectedsiteengineers.push($(this).find('.close').data('siteengineer-id'));
+        });
+        return selectedsiteengineers;
+    }
+
+    // $(document).ready(function () {
+    //     // Fetch assignment history data using AJAX
+    //     $.ajax({
+    //         url: '/AssignSiteEngineer/AssignmentHistory',
+    //         method: 'GET',
+    //         success: function (data) {
+    //             // Initialize DataTables when the data is available
+    //             initializeDataTables(data);
+    //         },
+    //         error: function (xhr, error, thrown) {
+    //             console.log('Error fetching assignment history:', error, thrown);
+    //             // alert('Error fetching assignment history. Please check the console for details.');
+    //         }
+    //     });
+    // });
+
+    // Function to initialize DataTables with the provided data
+    // function initializeDataTables(data) {
+    //     $('#assignmentHistoryTable').DataTable({
+    //         data: data,
+    //         columns: [
+    //             { data: 'projectName' },
+    //             { data: 'siteEngineerName' },
+    //             // { data: 'assignmentDate' }
+    //         ],
+    //         deferRender: true,  // Defer rendering until the data is available
+    //         error: function (xhr, error, thrown) {
+    //             console.log('DataTables error:', error, thrown);
+    //             //alert('DataTables error: Unable to render assignment history.');
+    //         }
+    //     });
+    // }
+
+    function initializeDataTables(data) {
+        $('#assignmentHistoryTable').DataTable({
+            data: data,
+            columns: [
+                { data: 'projectName' },
+                { data: 'siteEngineerName' },
+                
+            ],
+            deferRender: true,  // Defer rendering until the data is available
+            error: function (xhr, error, thrown) {
+                console.log('DataTables error:', error, thrown);
+                //alert('DataTables error: Unable to render assignment history.');
+            }
+        });
+    }
+
+
+</script>

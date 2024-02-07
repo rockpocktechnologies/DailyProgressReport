@@ -1,0 +1,309 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    ViewData["Title"] = "Material Transactions";
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+
+<style>
+    /* Center-align text in table cells */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+
+    th, td {
+        text-align: center;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+
+
+    /* Style for delete icon button */
+    .delete-icon {
+        cursor: pointer;
+    }
+
+
+    /* Style for submit and edit buttons */
+    button.submit-button:hover {
+        margin-left: 5px;
+        background-color: darkred;
+    }
+</style>
+
+
+<table id="materialTransactionTable" class="display responsive nowrap" style="width:100%">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Job Code </th>
+            <th>Block Name</th>
+            <th>Component Name</th>
+            <th>Location Name</th>
+            <th>Village Name</th>
+            <th>BOQ Head Name</th>
+            <th>BOQ Reference</th>
+            <th>Activity Code</th>
+            <th>Block Quantity</th>
+            <th>Type Of Pipe</th>
+            <th>Dia Of Pipe</th>
+            <th>UOM</th>
+            <th>JTD Quantity</th>
+            <th>Day Quantity</th>
+            <th>IsSubmitted</th>
+            <th>WBS Number</th>
+            <th>Actions</th> <!-- Action column header -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr data-id=@item.Id>
+
+                <td>
+                    @{
+                        if (item.Date != DateTime.MinValue)
+                        {
+                            <text>@item.Date.ToString("dd/MM/yyyy")</text>
+                        }
+                        else
+                        {
+                            <text>N/A</text> <!-- Or any default value/message you prefer -->
+                        }
+                    }
+                </td>
+
+
+                <td>@item.ProjectName</td>
+                <td>@item.BlockName</td>
+                <td>@item.ComponentName</td>
+                <td>@item.LocationName</td>
+                <td>@item.VillageName</td>
+                <td>@item.BOQHeadName</td>
+                <td>@item.BOQReferenceID</td>
+                <td>@item.ActivityCode</td>
+                <td>@item.BlockQuantity</td>
+                <td>@item.TypeOfPipe</td>
+                <td>@item.DiaOfPipe</td>
+                <td>@item.UOM</td>
+                <td>@item.JTDQuantity</td>
+                <td>@item.DayQuantity</td>
+                <td>@item.IsSubmitted</td>
+                <td>@item.WBSNumber</td>
+                <td>
+                    <i class="delete-icon fas fa-trash-alt text-danger" onclick="deleteEntry(this)" title="Delete Entry"></i>
+
+
+                    <button onclick="toggleSubmission(this)" class="btn btn-danger">Submit</button>
+
+
+                    <button onclick="editEntry(this)" class="btn btn-danger edit-button">Edit</button>
+
+
+                    <button onclick="updateEntry(this)" class="btn btn-danger update-button" style="display:none;">Update</button>
+                    <button onclick="cancelEdit(this)" class="btn btn-danger cancel-button" style="display:none;">Cancel</button>
+
+
+                </td>
+
+
+            </tr>
+        }
+    </tbody>
+    <tbody>
+
+
+
+</table>
+
+
+<form id="deleteForm" method="post" action="/ViewEntry/Delete">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteId" value="" />
+</form>
+
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.5/datatables.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $('#materialTransactionTable').DataTable({
+            responsive: true
+        });
+    });
+
+
+    var currentlyEditedRowId = null;
+
+
+    function deleteEntry(deleteIcon) {
+        var confirmDelete = confirm("Are you sure you want to delete this entry?");
+        if (confirmDelete) {
+            var row = $(deleteIcon).closest('tr'); // Find the closest row to the clicked delete icon
+            // Perform deletion logic here based on row position or other attributes
+            row.remove(); // Remove the row from the table
+            alert('Entry deleted successfully.');
+        }
+    }
+
+
+
+
+
+    function toggleSubmission(entryName) {
+        // Send AJAX request to update the submission status on the server
+        $.ajax({
+            url: '/ViewEntry/Submit',
+            type: 'POST',
+            data: { entryName: entryName }, // Pass the entryName to identify the entry
+            success: function (response) {
+                if (response.success) {
+                    // Handle success
+                } else {
+                    // Handle error
+                }
+            },
+            error: function (xhr, status, error) {
+                // Handle error
+            }
+        });
+    }
+
+
+
+    function editEntry(button) {
+        // Find the closest row to the clicked edit button
+        var row = $(button).closest('tr');
+
+        // Cancel editing for any previously edited row
+        cancelEdit();
+
+
+        // Store original values in data attributes for cancel functionality
+        row.find('td:not(:last-child)').each(function () {
+            var text = $(this).text();
+            $(this).data('original-value', text);
+            $(this).html('<input type="text" class="form-control" value="' + text + '">');
+        });
+
+
+        // Hide edit button for the edited row
+        row.find('.edit-button').hide();
+
+
+        // Show update and cancel buttons for the edited row
+        row.find('.update-button, .cancel-button').show();
+
+
+        // Disable edit for other rows
+        $('#materialTransactionTable tbody tr').not(row).find('.edit-button').prop('disabled', true);
+    }
+
+
+    function updateEntry(button) {
+        var row = $(button).closest('tr'); // Find the closest row to the button that was clicked
+
+
+        // Extract data from input fields in the row using jQuery selectors
+        var id = row.data('id');
+        var dateInput = row.find('input[name="Date"]').val();
+        var jobCodeID = row.find('input[name="JobCodeID"]').val();
+        var blockName = row.find('input[name="BlockName"]').val();
+        var componentName = row.find('input[name="ComponentName"]').val();
+        var locationName = row.find('input[name="LocationName"]').val();
+        var villageName = row.find('input[name="VillageName"]').val();
+        var boqHeadName = row.find('input[name="BOQHeadName"]').val();
+        var boqReferenceID = row.find('input[name="BOQReferenceID"]').val();
+        var activityCode = row.find('input[name="ActivityCode"]').val();
+        var blockQuantity = row.find('input[name="BlockQuantity"]').val();
+        var typeOfPipe = row.find('input[name="TypeOfPipe"]').val();
+        var diaOfPipe = row.find('input[name="DiaOfPipe"]').val();
+        var uom = row.find('input[name="UOM"]').val();
+        var jtdQuantity = row.find('input[name="JTDQuantity"]').val();
+        var dayQuantity = row.find('input[name="DayQuantity"]').val();
+        var isSubmitted = row.find('input[name="IsSubmitted"]').val();
+        var wbsNumber = row.find('input[name="WBSNumber"]').val();
+
+
+        var data = {
+            Id: id,
+            Date: dateInput,
+            JobCodeID: jobCodeID,
+            BlockName: blockName,
+            ComponentName: componentName,
+            LocationName: locationName,
+            VillageName: villageName,
+            BOQHeadName: boqHeadName,
+            BOQReferenceID: boqReferenceID,
+            ActivityCode: activityCode,
+            BlockQuantity: blockQuantity,
+            TypeOfPipe: typeOfPipe,
+            DiaOfPipe: diaOfPipe,
+            UOM: uom,
+            JTDQuantity: jtdQuantity,
+            DayQuantity: dayQuantity,
+            IsSubmitted: isSubmitted,
+            WBSNumber: wbsNumber
+        };
+
+
+        $.ajax({
+            url: '/ViewEntry/Edit/' + id,
+            type: 'POST',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    alert('Entry updated successfully.');
+                    // Restore original values for non-date fields
+                    row.find('td:not(:first-child)').each(function () {
+                        var originalValue = $(this).data('original-value');
+                        $(this).text(originalValue);
+                    });
+                    // Update date cell with the new formatted date
+                    row.find('td:first-child').text(dateInput);
+                    // Show the edit button after successful update
+                    row.find('.edit-button').show();
+                    row.find('.update-button, .cancel-button').hide();
+                } else {
+                    alert('Error updating entry: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('Error updating entry: ' + error);
+            }
+        });
+    }
+
+
+    function cancelEdit(button) {
+        var row = $(button).closest('tr');
+
+
+        // Restore original values for the row
+        row.find('td:not(:last-child)').each(function () {
+            var originalValue = $(this).data('original-value');
+            $(this).text(originalValue);
+        });
+
+
+        // Show the edit button and hide update/cancel buttons
+        row.find('.edit-button').show();
+        row.find('.update-button, .cancel-button').hide();
+
+
+        // Enable edit for other rows
+        $('#materialTransactionTable tbody tr').not(row).find('.edit-button').prop('disabled', false);
+    }
+
+
+</script>

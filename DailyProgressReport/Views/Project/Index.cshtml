@@ -1,0 +1,596 @@
+﻿@model List<ProjectViewModel>
+
+<div id="dynamicContentContainer" style="max-width: 800px; margin-left: 225px;">
+    @* <h3 class="text-center mb-4">Add New Project</h3>*@
+    <form asp-controller="Project" asp-action="SaveProject" method="post">
+        @{
+            var isEditAction = ViewContext.RouteData.Values["action"].ToString().Equals("Editproject", StringComparison.OrdinalIgnoreCase);
+        }
+        @if (isEditAction)
+        {
+            @if (Model != null)
+            {
+                <input type="hidden" name="ProjectID" value="@Model[0].ProjectID" />
+            }
+            <table class="text-center form-table" style="margin-left: 100px;width: 750px">
+                <tbody>
+                    @* <tr>
+    <th><label>Project Type</label></th>
+    <td>
+        <select name="ProjectType" class="form-control">
+            <option value="Road" @(Model.Count > 0 && Model[0]?.ProjectType == "Road" ? "selected" : "")>Road</option>
+            <option value="Tunnel" @(Model.Count > 0 && Model[0]?.ProjectType == "Tunnel" ? "selected" : "")>Tunnel</option>
+            <option value="Underground" @(Model.Count > 0 && Model[0]?.ProjectType == "Underground" ? "selected" : "")>Underground</option>
+            <option value="Water" @(Model.Count > 0 && Model[0]?.ProjectType == "Water" ? "selected" : "")>Water</option>
+        </select>
+    </td>
+</tr> *@
+                    <tr>
+                        <th><label>Project Type</label></th>
+                        <td>
+                            <select name="ProjectType" class="form-control">
+                                <option value="Road">Road</option>
+                                <option value="Tunnel">Tunnel</option>
+                                <option value="Underground">Underground</option>
+                                <option value="Water">Water</option>
+                            </select>
+                        </td>
+                    </tr>
+@*                     @Html.DropDownList("ID", ViewBag.ProjectTypes as SelectList, "Select Project Type", new { @class = "form-control" })
+ *@
+                    <tr>
+                        <th><label>Project Name</label></th>
+                        <td><input name="ProjectName" class="form-control" value="@((Model[0] != null) ? Model[0].ProjectName : "")" /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Short Name</label></th>
+                        <td><input name="ProjectShortName" class="form-control" value="@((Model[0] != null) ? Model[0].ProjectShortName : "")" /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Project Code</label></th>
+                        <td><input name="ProjectCode" class="form-control" value="@((Model[0] != null) ? Model[0].ProjectCode : "")" /></td>
+
+                    </tr>
+                    <tr>
+                        <th><label>Start Date</label></th>
+                        <td><input name="ProjectStartDate" id="ProjectStartDate" class="form-control" value="@((Model[0] != null) ? Model[0].ProjectStartDate : "")" /></td>
+                    </tr>
+                    <tr>
+                        <th><label>End Date</label></th>
+                        <td><input name="ProjectEndDate" id="ProjectEndDate" class="form-control" value="@((Model[0] != null) ? Model[0].ProjectEndDate : "")" /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Revised End Date</label></th>
+                        <td><input name="ProjectRevisedDate" id="ProjectRevisedDate" class="form-control" value="@((Model[0] != null) ? Model[0].ProjectRevisedDate : "")" /></td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <td>
+                            <button type="submit" class="btn btn-danger d-block mx-auto mt-3">
+
+                                <text>Update Changes</text>
+
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <table class="text-center form-table" style="margin-left: 100px;width: 750px">
+                <tbody>
+                    <tr>
+                        <th><label>Project Type</label></th>
+                        <td>
+                            <select name="ProjectType" class="form-control">
+                                <option value="Select Type">Select Type</option>
+                                <option value="Road">Road</option>
+                                <option value="Tunnel">Tunnel</option>
+                                <option value="Underground">Underground</option>
+                                <option value="Water">Water</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label>Project Name</label></th>
+                        <td><input name="ProjectName" class="form-control" value="" required /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Short Name</label></th>
+                        <td><input name="ProjectShortName" class="form-control" value="" required /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Project Code</label></th>
+                        <td><input id="ProjectCode" name="ProjectCode" class="form-control" value="" required placeholder="Ex.MH-1234" maxlength="7" /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Start Date</label></th>
+                        <td><input name="ProjectStartDate" id="ProjectStartDate" class="form-control" value="" required /></td>
+                    </tr>
+                    <tr>
+                        <th><label>End Date</label></th>
+                        <td><input name="ProjectEndDate" id="ProjectEndDate" class="form-control" value="" required /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Revised End Date</label></th>
+                        <td><input name="ProjectRevisedDate" id="ProjectRevisedDate" class="form-control" value="" required disabled /></td>
+                    </tr>
+                    <tr>
+                        <th><label>Is Location Required</label></th>
+                        <td style="text-align:center">
+                            <input type="checkbox" name="IsLocationRequired" id="isLocationRequiredCheckbox"  />
+
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th></th>
+                        <td>
+                            <button type="submit" class="btn btn-danger d-block mx-auto mt-3" id="123">
+
+                                <text>Save Changes</text>
+
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+        }
+    </form>
+
+
+    <br> <br>
+    @* <h3 class="text-center mb-4">Project List</h3>*@
+
+    <table id="projectTable" class="table" style="width: 1000px;">
+        <thead>
+            <tr>
+
+                <th>Project ID</th>
+                <th>Project Name</th>
+                <th>Short Name</th>
+                <th>Project Code</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Revised End Date</th>
+                <th>Action</th>
+                <th>Complete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>@project.ProjectID</td>
+                    <td>@project.ProjectName</td>
+                    <td>@project.ProjectShortName</td>
+                    <td>@project.ProjectCode</td>
+                    <td>@project.ProjectStartDate</td>
+                    <td>@project.ProjectEndDate</td>
+                    <td>@project.ProjectRevisedDate</td>
+
+
+                    <td>
+                        <i class="edit-icon" onclick="editProject(@project.ProjectID)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+                        </i>
+
+                        <i class="delete-icon" onclick="deleteProject(@project.ProjectID)">
+                            <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
+                        </i>
+
+
+
+
+
+                        @* <i class="fas fa-edit text-warning" onclick="editProject(@project.ProjectID)"></i>
+                    <i class="fas fa-trash-alt text-danger" onclick="deleteProject(@project.ProjectID)"></i>
+                    *@
+                    </td>
+                    <td>
+                        <i>
+                            <input type="checkbox" class="completion-checkbox" data-project-id="@project.ProjectID" @(project.IsCompleted ? "checked" : "") />
+
+                        </i>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button id="toggleEntriesButton">Show All Entries</button>
+</div>
+<!-- For Validation -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js"></script>
+
+<!-- For Checkbox -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"> </script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<!-- Include DataTables library and initialization script -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<script>
+    $(document).ready(function () {
+        // Enable jQuery validation on the form
+        $("#projectcont").validate();
+    });
+
+    $(document).ready(function () {
+        // DataTable configuration
+        var table = $('#projectListTable').DataTable({
+            destroy: true,
+        });
+
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    // $(document).ready(function () {
+    //     $('#projectTable').DataTable({
+    //         "columnDefs": [
+    //             {
+    //                 "targets": [0],  // Index of the column (ProjectID in this case)
+    //                 "visible": false,
+    //                 "searchable": false,
+    //             }
+    //         ],
+    //         "order": [[0, "desc"]]  // Sort by ProjectID in descending order
+    //     });
+    // });
+    $("#ProjectStartDate").datepicker({
+        dateFormat: "dd/mm/yy",
+        onSelect: function (selectedDate) {
+            var fromDate = new Date(formatDateForDisplay(selectedDate));
+            fromDate.setDate(fromDate.getDate()); // Minimum Return Date is Departure Date + 1 day
+            $("#ProjectEndDate").datepicker("option", "minDate", fromDate);
+
+
+        }
+    });
+
+    $("#ProjectEndDate").datepicker({
+        dateFormat: "dd/mm/yy",
+        onSelect: function (selectedDate) {
+            var toDate = new Date(formatDateForDisplay(selectedDate));
+            $("#ProjectStartDate").datepicker("option", "maxDate", toDate);
+
+            var fromDate = new Date(formatDateForDisplay(selectedDate));
+            fromDate.setDate(fromDate.getDate()); // Minimum Return Date is Depar
+            $("#ProjectRevisedDate").datepicker("option", "minDate", fromDate);
+            $("#ProjectRevisedDate").val($("#ProjectEndDate").val());
+            //var fromDate = new Date(formatDateForDisplay(selectedDate));
+            //fromDate.setDate(fromDate.getDate()); // Minimum Return Date is Departure Date + 1 day
+            //$("#travelReturnDate").datepicker("option", "minDate", fromDate);
+        }
+    });
+
+    if (window.location.href.indexOf("Editproject") > -1) {
+        $("#ProjectRevisedDate").datepicker({
+            minDate: 0, // Disable past dates
+            dateFormat: "dd/mm/yy",
+            onSelect: function (selectedDate) {
+                //var fromDate = new Date(formatDateForDisplay(selectedDate));
+                //fromDate.setDate(fromDate.getDate()); // Minimum Return Date is Departure Date + 1 day
+                //$("#travelReturnDate").datepicker("option", "minDate", fromDate);
+            }
+        });
+    }
+
+    function editProject(ProjectID) {
+        window.location.href = '/Project/Editproject?ProjectID=' + ProjectID;
+    }
+
+    function formatDateForDisplay(date) {
+        var dateParts = date.split("/");
+        if (dateParts.length === 3) {
+            var day = dateParts[0];
+            var month = dateParts[1];
+            var year = dateParts[2];
+            // Reformat the date as "dd/mm/yy" for display
+            return month + "/" + day + "/" + year;
+        }
+        // If the input date format is not as expected, return it as-is
+        return date;
+    }
+</script>
+<script>
+    function showConfirmationMessage(action) {
+        var confirmationMessage;
+        if (action === 'Save') {
+            confirmationMessage = 'Project created successfully!';
+        } else if (action === 'Save') {
+            confirmationMessage = 'Project updated successfully!';
+        }
+
+        // You can customize the appearance of the message (e.g., using a library like SweetAlert)
+        alert(confirmationMessage);
+    }
+
+    function deleteProject(ProjectID) {
+        if (confirm("Are you sure you want to delete this project?")) {
+            // Use AJAX to send a delete request to your server
+            $.ajax({
+                url: '/Project/DeleteProject',  // Update the URL to match your controller action
+                type: 'POST',
+                data: { ProjectID: ProjectID },
+                success: function (result) {
+                    if (result.success) {
+                        // Optionally update the UI or perform additional actions after successful deletion
+                        // For example, you might want to reload the table to reflect the updated data
+                        location.reload();
+                    } else {
+                        alert('Error deleting project: ' + result.message);
+                    }
+                },
+                error: function (error) {
+                    console.error('Error deleting project:', error);
+                }
+            });
+        }
+    }
+
+
+    $(document).ready(function () {
+        // Attach the event handler to the form submission
+        //$('form').submit(function () {
+        //    var action = $(this).attr('asp-action');
+        //    showConfirmationMessage(action);
+        //});
+    });
+    $(document).ready(function () {
+        $('#ProjectCode').blur(function () {
+            var projectCode = $(this).val();
+
+            // Make an Ajax request to the controller action
+            $.ajax({
+                url: '/Project/IsProjectCodeUnique',
+                type: 'POST',
+                data: { projectCode: projectCode },
+                success: function (result) {
+                    if (result) {
+                        // Project code is unique
+                        $('#projectCodeMessage').text('Project code is unique.');
+                    } else {
+                        // Project code is not unique
+                        $('#projectCodeMessage').text('Project code already exists.');
+
+                        // Show an alert
+                        alert('There is already a project with this code :  ' + projectCode);
+                    }
+                },
+                error: function () {
+                    console.error('Error in Ajax request.');
+                }
+            });
+        });
+    });
+
+
+    function toggleProjectStatus(ProjectID, control) {
+        var isactive = $(control).attr("data-isactive");
+        //var msg = "";
+        if (isactive == "True") {
+            msg = "Are you sure you want to deactivate the project?";
+        }
+        else {
+            msg = "Are you sure you want to activate the project?";
+        }
+        // Display a confirmation dialog
+        if (confirm(msg)) {
+            // Call the controller action to toggle the project status
+            $.ajax({
+                url: '/Project/ToggleProjectStatus',
+                type: 'POST',
+                data: { ProjectID: ProjectID },
+                success: function (result) {
+                    // Handle success (you can customize this as needed)
+                    if (result.success) {
+                        // Reload the page or update the UI as needed
+                        location.reload();
+                    } else {
+                        alert("Failed to toggle project status. Please try again.");
+                    }
+                },
+                error: function () {
+                    // Handle error (you can customize this as needed)
+                    alert("An error occurred while toggling project status.");
+                }
+            });
+        }
+    }
+    function showStatus(element) {
+        const title = element.getAttribute("title");
+        const colorClass = project.IsActive ? "text-success" : "text-dark";
+        element.setAttribute("title", title + `<br>Status: ${project.IsActive ? "Active" : "Inactive"}`);
+        element.classList.add(colorClass);
+    }
+
+    function hideStatus(element) {
+        const title = element.getAttribute("title").replace(/<br>Status: .*/, "");
+        const colorClass = project.IsActive ? "text-success" : "text-dark";
+        element.setAttribute("title", title);
+        element.classList.remove(colorClass);
+    }
+
+    function validateAndSave() {
+        // Clear previous validation error messages
+        $('#validationError').text('');
+
+        var projectCode = $('#ProjectCode').val();
+
+        // Perform client-side validation
+        if (!projectCode) {
+            $('#validationError').text('Project Code is required.');
+            return false; // Prevent further execution
+        }
+
+        // Perform AJAX call to check uniqueness
+        $.ajax({
+            url: '/Project/IsProjectCodeUnique',
+            type: 'POST',
+            data: { projectCode: projectCode, ProjectID: $('#ProjectID').val() },
+            success: function (result) {
+                if (result.success) {
+                    // If the project code is unique, proceed with saving
+                    saveProject();
+                } else {
+                    // If not unique, display an error message
+                    $('#validationError').text(result.message);
+                }
+            },
+            error: function () {
+                // Handle AJAX error
+                alert('Error checking project code uniqueness.');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        var showAll = true;
+
+        $('#toggleEntriesButton').click(function () {
+            // Toggle the visibility of all rows in the table
+            $('#projectTable tbody tr').toggle();
+            // $('#gridView tbody tr').toggle();
+
+            // Change the button text based on the current state
+            var buttonText = showAll ? 'Show All Entries' : 'Show Less Entries';
+            $('#toggleEntriesButton').text(buttonText);
+
+            // Update the state variable
+            showAll = !showAll;
+        });
+    });
+   
+    $(document).ready(function () {
+        $('#projectTable').DataTable({
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false,
+                }
+            ],
+            "order": [[0, "desc"]],
+        });
+
+        $('.completion-checkbox').change(function () {
+            var ProjectID = $(this).data('project-id');
+            var IsCompleted = $(this).prop('checked');
+
+            console.log('Checkbox change event triggered.');
+            console.log('ProjectID:', ProjectID);
+            console.log('IsCompleted:', IsCompleted);
+
+            // Update the alert message based on the checkbox state
+            //var alertMessage = IsCompleted ? "You want to complete Project" : "You want to uncomplete Project";
+            //alert(alertMessage);
+            if (confirm("Are you sure you want to complete this project?")) {
+
+                // Perform an AJAX call to update the completion status
+                $.ajax({
+                    url: '/Project/UpdateCompletionStatus',
+                    type: 'POST',
+                    data: { ProjectID: ProjectID, IsCompleted: IsCompleted },
+                    success: function (result) {
+                        if (result.success) {
+                            // Optional: Handle success (e.g., show a message)
+                            console.log('Completion status updated successfully.');
+                        } else {
+                            // Optional: Handle failure (e.g., show an error message)
+                            console.error('Failed to update completion status:', result.message);
+                        }
+                    },
+                    error: function () {
+                        // Optional: Handle AJAX error
+                        console.error('Error updating completion status.');
+                    }
+                });
+            }
+        });
+    });
+
+//     $(document).ready(function () {
+//         alert("new complete")
+//     // Function to set checkbox states based on server data
+//     function setCheckboxStates() {
+//         $('.completion-checkbox').each(function () {
+//             var ProjectID = $(this).data('project-id');
+//                 // Update the alert message based on the checkbox state
+//                 var alertMessage = IsCompleted ? "You want to complete Project" : "You want to uncomplete Project";
+//                          alert(alertMessage);
+//                 if (confirm("Are you sure you want to complete this project?")) {
+//             // Perform an AJAX call to get the completion status
+//             $.ajax({
+//                 url: '/Project/GetCompletionStatus',
+//                 type: 'GET',
+//                 data: { ProjectID: ProjectID },
+//                 success: function (result) {
+//                     if (result.success) {
+//                         // Update checkbox state based on completion status
+//                         $(this).prop('checked', result.isCompleted);
+//                     } else {
+//                         // Optional: Handle failure (e.g., show an error message)
+//                         console.error('Failed to get completion status:', result.message);
+//                     }
+//                 },
+//                 error: function () {
+//                     // Optional: Handle AJAX error
+//                     console.error('Error getting completion status.');
+//                 }
+//             });
+//         });
+//     }
+
+//     // Call the function to set checkbox states when the page loads
+//     setCheckboxStates();
+
+//     // Event handler for completion checkboxes
+//     $('.completion-checkbox').change(function () {
+//         var ProjectID = $(this).data('project-id');
+//         var IsCompleted = $(this).prop('checked');
+
+//         // Perform an AJAX call to update the completion status
+//         $.ajax({
+//             url: '/Project/UpdateCompletionStatus',
+//             type: 'POST',
+//             data: { ProjectID: ProjectID, IsCompleted: IsCompleted },
+//             success: function (result) {
+//                 if (result.success) {
+//                     // Optional: Handle success (e.g., show a message)
+//                     console.log('Completion status updated successfully.');
+//                 } else {
+//                     // Optional: Handle failure (e.g., show an error message)
+//                     console.error('Failed to update completion status:', result.message);
+//                 }
+//             },
+//             error: function () {
+//                 // Optional: Handle AJAX error
+//                 console.error('Error updating completion status.');
+//             }
+//         });
+//     });
+// });
+
+    
+
+
+
+</script>
+
+

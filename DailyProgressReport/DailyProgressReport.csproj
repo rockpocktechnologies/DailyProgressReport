@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Views\Planning\**" />
+    <Compile Remove="Views\pln manager\**" />
+    <Content Remove="Views\Planning\**" />
+    <Content Remove="Views\pln manager\**" />
+    <EmbeddedResource Remove="Views\Planning\**" />
+    <EmbeddedResource Remove="Views\pln manager\**" />
+    <None Remove="Views\Planning\**" />
+    <None Remove="Views\pln manager\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\PlanningController.cs" />
+    <Compile Remove="Models\PlanningModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\NewFolder\" />
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>
