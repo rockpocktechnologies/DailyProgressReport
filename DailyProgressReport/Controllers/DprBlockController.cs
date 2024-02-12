@@ -40,18 +40,18 @@ namespace DailyProgressReport.Controllers
                 errorLogger.LogError(ex, exceptionMessage);
                 return Json(new { error = ex.Message });
             }
-           
+
         }
 
         [HttpPost]
-        public IActionResult AddBlock(string blockName, int projectId)
+        public IActionResult AddBlock(string blockName, int projectId, int BlockQuantity)
         {
             try
             {
                 string loggedInUserId = HttpContext.Session.GetString("SLoggedInUserID");
                 if (loggedInUserId != null && loggedInUserId != "")
                 {
-                    AddBlockToDatabase(blockName, projectId, loggedInUserId); // Replace "User123" with the actual user or logged-in user
+                    AddBlockToDatabase(blockName, projectId, loggedInUserId, BlockQuantity); // Replace "User123" with the actual user or logged-in user
                     return Json(new { success = true, message = "Block added successfully!" });
                 }
                 else
@@ -100,7 +100,7 @@ namespace DailyProgressReport.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateBlock(int id, string blockName, int projectId)
+        public IActionResult UpdateBlock(int id, string blockName, int projectId, int BlockQuantity)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace DailyProgressReport.Controllers
 
                 if (loggedInUserId != null)
                 {
-                    UpdateBlockInDatabase(id, blockName, projectId, loggedInUserId); // Replace "User123" with the actual user or logged-in user
+                    UpdateBlockInDatabase(id, blockName, projectId, loggedInUserId, BlockQuantity); // Replace "User123" with the actual user or logged-in user
                     return Json(new { success = true, message = "Block updated successfully!" });
                 }
                 else
@@ -143,7 +143,7 @@ namespace DailyProgressReport.Controllers
             }
         }
 
-        private void AddBlockToDatabase(string blockName, int projectId, string createdBy)
+        private void AddBlockToDatabase(string blockName, int projectId, string createdBy, int BlockQuantity)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
             {
@@ -153,6 +153,7 @@ namespace DailyProgressReport.Controllers
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@BlockName", blockName);
+                    command.Parameters.AddWithValue("@BlockQuantity", BlockQuantity);
                     command.Parameters.AddWithValue("@ProjectId", projectId);
                     command.Parameters.AddWithValue("@CreatedBy", createdBy);
 
@@ -163,48 +164,65 @@ namespace DailyProgressReport.Controllers
 
         private List<DprBlock> GetBlockListFromDatabase()
         {
+            List<DprBlock> blocks = new List<DprBlock>();
 
-           
-                List<DprBlock> blocks = new List<DprBlock>();
-            string loggedInUserId = HttpContext.Session.GetString("SLoggedInUserID");
-
-            if (loggedInUserId != null)
+            try
             {
-                CommonFunction cmn = new CommonFunction();
-                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
+                //List<DprBlock> blocks = new List<DprBlock>();
+                string loggedInUserId = HttpContext.Session.GetString("SLoggedInUserID");
+
+                if (loggedInUserId != null)
                 {
-                    connection.Open();
-
-                    using (SqlCommand command = new SqlCommand("dpr_sp_GetBlocksByUser", connection))
+                    CommonFunction cmn = new CommonFunction();
+                    using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
                     {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@Username", loggedInUserId);
+                        connection.Open();
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlCommand command = new SqlCommand("dpr_sp_GetBlocksByUser", connection))
                         {
-                            while (reader.Read())
-                            {
-                                DprBlock block = new DprBlock
-                                {
-                                    Id = (int)reader["Id"],
-                                    BlockName = reader["BlockName"].ToString(),
-                                    ProjectId = (int)reader["ProjectId"],
-                                    ProjectName = reader["ProjectName"].ToString(),
-                                    // Add other properties as needed
-                                    CreatedDate = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["CreatedDate"].ToString()),
-                                    CreatedBy = reader["CreatedBy"].ToString(),
-                                    UpdatedDate = reader["UpdatedDate"] != DBNull.Value ? cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["UpdatedDate"].ToString()) : "",
-                                    UpdatedBy = reader["UpdatedBy"] != DBNull.Value ? reader["UpdatedBy"].ToString() : null
-                                };
+                            command.CommandType = CommandType.StoredProcedure;
+                            command.Parameters.AddWithValue("@Username", loggedInUserId);
 
-                                blocks.Add(block);
+                            using (SqlDataReader reader = command.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    DprBlock block = new DprBlock
+                                    {
+                                        Id = (int)reader["Id"],
+                                        BlockName = reader["BlockName"].ToString(),
+                                        ProjectId = (int)reader["ProjectId"],
+                                        ProjectName = reader["ProjectName"].ToString(),
+                                        BlockQuantity = reader["BlockQuantity"] != DBNull.Value ? (int)reader["BlockQuantity"] : 0,
+
+                                        // Add other properties as needed
+                                        CreatedDate = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["CreatedDate"].ToString()),
+                                        CreatedBy = reader["CreatedBy"].ToString(),
+                                        UpdatedDate = reader["UpdatedDate"] != DBNull.Value ? cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["UpdatedDate"].ToString()) : "",
+                                        UpdatedBy = reader["UpdatedBy"] != DBNull.Value ? reader["UpdatedBy"].ToString() : null
+                                    };
+
+                                    blocks.Add(block);
+                                }
                             }
                         }
                     }
                 }
+
             }
 
+            catch (Exception ex)
+            {
+                string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
+                string exceptionMessage = $"Exception in method '{methodName}'";
+
+                // Log or rethrow the exception with the updated message
+                var errorLogger = new CustomErrorLog(_configuration);
+                errorLogger.LogError(ex, exceptionMessage);
+                //return Json(new { error = ex.Message });
+            }
             return blocks;
+
         }
 
 
@@ -228,6 +246,8 @@ namespace DailyProgressReport.Controllers
                             block.Id = (int)reader["Id"];
                             block.BlockName = reader["BlockName"].ToString();
                             block.ProjectId = (int)reader["ProjectId"];
+                            block.BlockQuantity = (int)reader["BlockQuantity"];
+
                             // Add other properties as needed
                             block.CreatedDate = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["CreatedDate"].ToString());
                             block.CreatedBy = reader["CreatedBy"].ToString();
@@ -241,7 +261,7 @@ namespace DailyProgressReport.Controllers
             return block;
         }
 
-        private void UpdateBlockInDatabase(int id, string blockName, int projectId, string modifiedBy)
+        private void UpdateBlockInDatabase(int id, string blockName, int projectId, string modifiedBy, int BlockQuantity)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
             {
@@ -253,6 +273,7 @@ namespace DailyProgressReport.Controllers
 
                     command.Parameters.AddWithValue("@Id", id);
                     command.Parameters.AddWithValue("@BlockName", blockName);
+                    command.Parameters.AddWithValue("@BlockQuantity", BlockQuantity);
                     command.Parameters.AddWithValue("@ProjectId", projectId);
                     command.Parameters.AddWithValue("@ModifiedBy", modifiedBy);
 
@@ -307,6 +328,7 @@ namespace DailyProgressReport.Controllers
                                 {
                                     ProjectID = Convert.ToInt32(reader["ProjectID"]),
                                     ProjectName = reader["ProjectName"].ToString(),
+                                    //BlockQuantity = Convert.ToInt32(reader["BlockQuantity"]),
                                     ProjectShortName = reader["ProjectShortName"].ToString(),
                                     ProjectCode = reader["ProjectCode"].ToString(),
                                     ProjectStartDate = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["ProjectStartDate"].ToString()),

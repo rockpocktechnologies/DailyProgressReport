@@ -4,9 +4,9 @@
 }
 
 <div id="addBlockContainer" class="container mt-4">
-  @*  <h3 class="text-center mb-4">Add Block</h3>*@
+    @*  <h3 class="text-center mb-4">Add Block</h3>*@
     <form style="text-align: center;">
-                <div class="form-group">
+        <div class="form-group">
             <h6 class="mb-4">Project:</h6>
             <select id="projectId" name="projectId" class="form-control">
                 <option value="">Please Select</option>
@@ -20,9 +20,12 @@
 
         <div class="form-group">
             <h6 class="mb-4">Block Name:</h6>
-            <input type="text" id="blockName" name="blockName" class="form-control" placeholder="Enter Block Name">
+            <input type="text" id="BlockName" name="BlockName" class="form-control" placeholder="Enter Block Name">
         </div>
-
+        <div class="form-group">
+            <h6 class="mb-4">Block Quantity:</h6>
+            <input type="text" id="BlockQuantity" name="BlockQuantity" class="form-control" placeholder="Enter Quantity">
+        </div>
 
         <div style="margin-top: 15px;">
             <button id="btnAddBlock" type="button" class="btn btn-danger" onclick="addBlock()">Add</button>
@@ -32,13 +35,14 @@
 </div>
 
 <div id="blockListContainer" class="container mt-4">
-@*    <h3 class="text-center mb-4">Block List</h3>
-*@    <table id="blockTable" class="table">
+    @*    <h3 class="text-center mb-4">Block List</h3>
+    *@    <table id="blockTable" class="table">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Block Name</th>
                 <th>Project Name</th>
+                <th>Block Quantity</th>
                 <th>Created Date</th>
                 <th>Created By</th>
                 <th>Updated Date</th>
@@ -53,12 +57,13 @@
                     <td>@block.Id</td>
                     <td>@block.BlockName</td>
                     <td>@block.ProjectName</td>
+                    <td>@block.BlockQuantity</td>
                     <td>@block.CreatedDate</td>
                     <td>@block.CreatedBy</td>
                     <td>@block.UpdatedDate</td>
                     <td>@block.UpdatedBy</td>
                     <td>
-                        <i class="edit-icon" onclick="editBlock(@block.Id,'@block.BlockName',@block.ProjectId)">
+                        <i class="edit-icon" onclick="editBlock(@block.Id,'@block.BlockName',@block.ProjectId,@block.BlockQuantity)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
                         </i>
 
@@ -96,16 +101,19 @@
 
 
     function addBlock() {
-        var blockName = $("#blockName").val();
+        var blockName = $("#BlockName").val();
         var projectId = $("#projectId").val();
+        var BlockQuantity = $("#BlockQuantity").val();
 
         // Use AJAX to call the controller action for adding a block
-        $.post('@Url.Action("AddBlock", "DprBlock")', { blockName: blockName, projectId: projectId }, function (data) {
+        $.post('@Url.Action("AddBlock", "DprBlock")', { blockName: blockName, projectId: projectId, BlockQuantity: BlockQuantity }, function (data) {
             if (data.success) {
                 alert(data.message);  // Show success alert
                 // Optionally, clear the form fields
-                $("#blockName").val("");
+                $("#BlockName").val("");
                 $("#projectId").val("");
+                $("#BlockQuantity").val("");
+
                 // Optionally, hide the Add Block section
                 $("#addBlockContainer").hide();
                 // Show the Block List section
@@ -117,16 +125,18 @@
             }
         });
     }
-    function editBlock(id,blockname, projectId) {
+    function editBlock(id, blockname, projectId, BlockQuantity) {
         // Fill the project name and group code in the respective input fields
         //$("#id").val(id);
         // $("#projectId").val(projectId);
-       // $("#id").val(id);
+        // $("#id").val(id);
         $("#projectId").val(projectId);
-        $("#blockName").val(blockname);
+        $("#BlockName").val(blockname);
+        $("#BlockQuantity").val(BlockQuantity);
 
 
-       
+
+
 
         // Change the button text and bind the update function
         $("#btnAddBlock").removeAttr("onclick");
@@ -136,14 +146,18 @@
     }
 
     function UpdateBlock(id) {
-        var blockName = $("#blockName").val();
+        alert("update")
+
+        var blockName = $("#BlockName").val();
         var projectId = $("#projectId").val();
-        var blockName = $("#blockName").val();
-        
+        // var blockName = $("#blockName").val();
+        var BlockQuantity = $("#BlockQuantity").val();
+
+
 
         if (blockName != "") {
             // Use AJAX to call the controller action for updating a component
-            $.post('@Url.Action("UpdateBlock", "DprBlock")', { id: id, blockName: blockName, projectId: projectId }, function (data) {
+            $.post('@Url.Action("UpdateBlock", "DprBlock")', { id: id, blockName: blockName, projectId: projectId, BlockQuantity: BlockQuantity }, function (data) {
                 if (data.success) {
                     alert(data.message);  // Show success alert
                     window.location.href = '/DprBlock/Index';
@@ -284,6 +298,8 @@
         // Reset form fields to their initial state
         $("#blockName").val("");
         $("#id").val("");
+        $("#BlockQuantity").val("");
+
 
         // Change the button text and bind the add function
         $("#btnAddBlock").off("click"); // Remove previous click event handlers
@@ -324,7 +340,7 @@
         window.location.href = '/AddMaster/Index';
     }
 
-    function ReLoadDprBlock(){
-        window.location.href = '/DprBlock/Index'; 
+    function ReLoadDprBlock() {
+        window.location.href = '/DprBlock/Index';
     }
 </script>
