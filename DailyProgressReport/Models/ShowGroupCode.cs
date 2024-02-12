@@ -6,5 +6,6 @@
 
         public List<ActivityModel> Activity { get; set; }
         public List<GroupCodeModel> Group { get; set; }
+        public List<ViewEntryViewModel> viewentry { get; set; }
     }
 }

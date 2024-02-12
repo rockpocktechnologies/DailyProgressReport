@@ -1,4 +1,6 @@
-﻿namespace DailyProgressReport.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DailyProgressReport.Models
 {
     public class ViewEntryViewModel
     {
@@ -19,10 +21,12 @@
         public string DiaOfPipe { get; set; }
         public string UOM { get; set; }
         public int? JTDQuantity { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "The Day Quantity must be a positive integer.")]
         public int? DayQuantity { get; set; }
 
         public bool? IsSubmitted { get; set; }
         public string WBSNumber { get; set; }
+
     }
 
 }

@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using DailyProgressReport.Models;
 using System.Data;
 using Microsoft.Extensions.Configuration;
-
+using DailyProgressReport.Classes;
 
 namespace DailyProgressReport.Controllers
 
@@ -25,8 +25,13 @@ namespace DailyProgressReport.Controllers
         {
             try
             {
-                var viewEntryViewModels = GetMaterialTransactions();
-                return View(viewEntryViewModels);
+                ShowGroupCode shwo = new ShowGroupCode();
+
+                //  var viewEntryViewModels = GetMaterialTransactions();
+
+                List<ViewEntryViewModel> activities = GetMaterialTransactions();
+                shwo.viewentry = activities;
+                return View(shwo);
             }
             catch (Exception ex)
             {
@@ -49,7 +54,6 @@ namespace DailyProgressReport.Controllers
                 return View("Error");
             }
         }
-
         [HttpPost]
         public IActionResult Edit(ViewEntryViewModel updatedEntry)
         {
@@ -61,13 +65,12 @@ namespace DailyProgressReport.Controllers
                     updatedEntry.Date = DateTime.Now;
                 }
                 UpdateMaterialTransaction(updatedEntry);
-                //return RedirectToAction("Index");
-                return Json(new { success = true, message = "Entry updated successfully." });
 
+                // Handle the redirect logic here
+                return RedirectToAction("Index", new { id = updatedEntry.Id });
             }
             catch (Exception ex)
             {
-                // Log the exception
                 return Json(new { success = false, message = "Error updating entry: " + ex.Message });
             }
         }
@@ -89,49 +92,53 @@ namespace DailyProgressReport.Controllers
             }
         }
 
-        public IActionResult Delete(int id)
-        {
-            try
-            {
-                DeleteMaterialTransaction(id);
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                return View("Error");
-            }
-        }
-
+        //public IActionResult Delete(int id)
+        //{
+        //    try
+        //    {
+        //        DeleteMaterialTransaction(id);
+        //        return RedirectToAction("Index");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log the exception
+        //        return View("Error");
+        //    }
+        //}
+        [HttpPost]
         public IActionResult Submit(int id)
         {
             try
             {
                 UpdateIsSubmitted(id);
-                return Json(new { success = true, message = "Entry submitted successfully." });
+                return Json(new { success = true, message = "Entry submitted successfully.", id });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error submitting entry: " + ex.Message });
             }
         }
-        //    // Process and update the entry in the database
-        //    UpdateMaterialTransaction(updatedEntry);
-
-        //    return RedirectToAction("Index");
-        //}   
 
 
 
-        //public IActionResult Delete(int id)
-        //{
-        //    // Perform deletion operation based on the provided id
-        //    DeleteMaterialTransaction(id);
 
-        //    // Redirect back to the Index action after deletion
-        //    return RedirectToAction("Index");
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                // Perform deletion operation based on the provided JobCode
+                DeleteMaterialTransaction(id);
 
-        //}
+                // Redirect back to the Index action after deletion
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that may occur during deletion
+                // You can log the error or show an error message to the user
+                return RedirectToAction("Index"); // or return an error view
+            }
+        }
 
 
         //public IActionResult Submit(int id)
@@ -160,7 +167,7 @@ namespace DailyProgressReport.Controllers
 
 
         [HttpPost]
-        public IActionResult EditEntryes(List<ViewEntryViewModel> updatedEntries)
+        public IActionResult Edit(List<ViewEntryViewModel> updatedEntries)
         {
             try
             {
@@ -181,56 +188,28 @@ namespace DailyProgressReport.Controllers
             {
                 connection.Open();
 
-                string query = @"UPDATE dpr_MaterialTransactions 
-                         SET Date = @Date, 
-                             JobCodeID = @JobCodeID, 
-                             BlockName = @BlockName, 
-                             ComponentName = @ComponentName, 
-                             LocationName = @LocationName, 
-                             VillageName = @VillageName, 
-                             BOQHeadName = @BOQHeadName,
-                             BOQReferenceID = @BOQReferenceID, 
-                             ActivityCode = @ActivityCode, 
-                             BlockQuantity = @BlockQuantity, 
-                             TypeOfPipe = @TypeOfPipe, 
-                             DiaOfPipe = @DiaOfPipe, 
-                             UOM = @UOM, 
-                             JTDQuantity = @JTDQuantity, 
-                             DayQuantity = @DayQuantity, 
-                              
-                             IsSubmitted = @IsSubmitted, 
-                             WBSNumber = @WBSNumber 
-                         FROM dpr_MaterialTransactions mt
-                         LEFT JOIN dpr_block b ON mt.ID = b.Id
-                         LEFT JOIN dpr_addcomponent c ON mt.ComponentID = c.Id
-                         LEFT JOIN dpr_location l ON mt.LocationID = l.Id
-                         LEFT JOIN dpr_village vn ON mt.VillageNameID = vn.Id
-                         LEFT JOIN dpr_boqhead bh ON mt.BOQHeadID = bh.Id
-                         LEFT JOIN dpr_tbl_ActivityCode a ON mt.ActivityID = a.Id
-                         LEFT JOIN dpr_tblProjects p ON mt.Id = p.ProjectID
-                       
-                         WHERE Id = @Id";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlCommand command = new SqlCommand("dpr_sp_UpdateMaterialTransaction", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+
                     // Add parameters
-                    command.Parameters.AddWithValue("@Id", model.Id);
-                    command.Parameters.AddWithValue("@Date", model.Date);
-                    command.Parameters.AddWithValue("@JobCodeID", model.JobCodeID);
-                    command.Parameters.AddWithValue("@BlockName", model.BlockName);
-                    command.Parameters.AddWithValue("@ComponentName", model.ComponentName);
-                    command.Parameters.AddWithValue("@LocationName", model.LocationName);
-                    command.Parameters.AddWithValue("@VillageName", model.VillageName);
-                    command.Parameters.AddWithValue("@BOQHeadName", model.BOQHeadName);
-                    command.Parameters.AddWithValue("@BOQReferenceID", model.BOQReferenceID);
-                    command.Parameters.AddWithValue("@ActivityCode", model.ActivityCode);
-                    command.Parameters.AddWithValue("@BlockQuantity", model.BlockQuantity);
+                    command.Parameters.AddWithValue("@ID", model.Id);
+                    //command.Parameters.AddWithValue("@ProjectName", model.ProjectName);
+
+                    //command.Parameters.AddWithValue("@BlockName", model.BlockName);
+                    //command.Parameters.AddWithValue("@ComponentName", model.ComponentName);
+                    //command.Parameters.AddWithValue("@LocationName", model.LocationName);
+                    //command.Parameters.AddWithValue("@VillageName", model.VillageName);
+                    //command.Parameters.AddWithValue("@BOQHeadName", model.BOQHeadName);
+                    //command.Parameters.AddWithValue("@BOQReferenceID", model.BOQReferenceID);
+                    //command.Parameters.AddWithValue("@ActivityCode", model.ActivityCode);
+                    command.Parameters.AddWithValue("@BlockQuantity", model.BlockQuantity); // Assuming BlockQuantity is a property of type int in ViewEntryViewModel
+
                     command.Parameters.AddWithValue("@TypeOfPipe", model.TypeOfPipe);
                     command.Parameters.AddWithValue("@DiaOfPipe", model.DiaOfPipe);
                     command.Parameters.AddWithValue("@UOM", model.UOM);
                     command.Parameters.AddWithValue("@JTDQuantity", model.JTDQuantity);
                     command.Parameters.AddWithValue("@DayQuantity", model.DayQuantity);
-
                     command.Parameters.AddWithValue("@IsSubmitted", model.IsSubmitted);
                     command.Parameters.AddWithValue("@WBSNumber", model.WBSNumber);
 
@@ -238,6 +217,7 @@ namespace DailyProgressReport.Controllers
                 }
             }
         }
+
         private void UpdateMaterialTransaction(List<ViewEntryViewModel> models)
         {
             foreach (var model in models)
@@ -245,6 +225,8 @@ namespace DailyProgressReport.Controllers
                 UpdateMaterialTransaction(model);
             }
         }
+
+
 
         private void UpdateIsSubmitted(int id)
         {
@@ -260,6 +242,7 @@ namespace DailyProgressReport.Controllers
             }
         }
 
+
         private List<ViewEntryViewModel> GetMaterialTransactions()
         {
             var viewentryViewModels = new List<ViewEntryViewModel>();
@@ -268,31 +251,19 @@ namespace DailyProgressReport.Controllers
             {
                 connection.Open();
 
-                string query = @"SELECT mt.Date, mt.JobCodeID, b.BlockName, c.ComponentName, 
-        l.LocationName, vn.VillageName, bh.BOQHeadName, mt.BOQReferenceID,
-        a.ActivityCode, mt.BlockQuantity, mt.TypeOfPipe, mt.DiaOfPipe, mt.UOM, 
-        mt.JTDQuantity, mt.DayQuantity, mt.IsSubmitted, mt.WBSNumber
-        FROM rockpock.dpr_MaterialTransactions mt
-                        
-        LEFT JOIN dpr_block b ON mt.ID = b.Id
-        LEFT JOIN dpr_addcomponent c ON mt.ComponentID = c.Id
-        LEFT JOIN dpr_location l ON mt.LocationID = l.Id
-        LEFT JOIN dpr_village vn ON mt.VillageNameID = vn.Id
-        LEFT JOIN dpr_boqhead bh ON mt.BOQHeadID = bh.Id
-        LEFT JOIN dpr_tbl_ActivityCode a ON mt.ActivityID = a.Id";
-
-
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlCommand command = new SqlCommand("[rockpock].[GetMaterialTransactions]", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             var viewentryViewModel = new ViewEntryViewModel
                             {
-                                //Id = Convert.ToInt32(reader["Id"]),
-                                Date = reader["Date"] as DateTime?,
-                                JobCodeID = reader["JobCodeID"] as string,
+                                Id = Convert.ToInt32(reader["ID"]),
+                                Date = (DateTime)reader["Date"],
+                                ProjectName = reader["ProjectName"] as string,
                                 BlockName = reader["BlockName"] as string,
                                 ComponentName = reader["ComponentName"] as string,
                                 LocationName = reader["LocationName"] as string,
@@ -306,12 +277,7 @@ namespace DailyProgressReport.Controllers
                                 UOM = reader["UOM"] as string,
                                 JTDQuantity = reader["JTDQuantity"] as int?,
                                 DayQuantity = reader["DayQuantity"] as int?,
-                                //Username = reader["username"] as string,
-                                //CreatedDate = reader["CreatedDate"] as DateTime?,
-                                //CreatedBy = reader["CreatedBy"] as string,
-                                //ModifiedDate = reader["ModifiedDate"] as DateTime?,
-                                //ModifiedBy = reader["ModifiedBy"] as string,
-                                IsSubmitted = reader["issubmitted"] as bool?,
+                                IsSubmitted = reader["IsSubmitted"] as bool?,
                                 WBSNumber = reader["WBSNumber"] as string
                             };
 
@@ -324,21 +290,130 @@ namespace DailyProgressReport.Controllers
             return viewentryViewModels;
         }
 
-        private void DeleteMaterialTransaction(int id)
+
+        //private void DeleteMaterialTransaction(int id)
+        //{
+        //    using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
+        //    {
+        //        connection.Open();
+
+        //        string query = "DELETE FROM dpr_MaterialTransactions WHERE Id = @Id";
+
+        //        using (SqlCommand command = new SqlCommand(query, connection))
+        //        {
+        //            command.Parameters.AddWithValue("@Id", id);
+        //            command.ExecuteNonQuery();
+        //        }
+        //    }
+        //}
+
+        [HttpPost]
+        public ActionResult DeleteMaterialTransaction(int Id)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
+                {
+                    connection.Open();
+
+                    string sqlQuery = "DELETE FROM dpr_MaterialTransactions WHERE Id = @Id";
+
+                    using (SqlCommand command = new SqlCommand(sqlQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", Id);
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                return Json(new { success = true, message = "View Entry deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error deleting View Entry", error = ex.Message });
+            }
+        }
+
+
+
+
+
+
+        [HttpPost]
+        public IActionResult UpdateViewEntry(int id, int BlockQuantity, int JTDQuantity, int DayQuantity)
+        {
+            try
+            {
+                string updatedBy = HttpContext.Session.GetString("SLoggedInUserID");
+                UpdateViewEntryInDatabase(id, BlockQuantity, JTDQuantity, DayQuantity);
+                return Json(new { success = true, message = "View Entry  updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
+                string exceptionMessage = $"Exception in method '{methodName}'";
+
+
+                // Log or rethrow the exception with the updated message
+                var errorLogger = new CustomErrorLog(_configuration);
+                errorLogger.LogError(ex, exceptionMessage);
+                return Json(new { error = ex.Message });
+            }
+        }
+
+
+        private void UpdateViewEntryInDatabase(int id, int BlockQuantity, int JTDQuantity, int DayQuantity)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
             {
                 connection.Open();
 
-                string query = "DELETE FROM rockpock.dpr_MaterialTransactions WHERE Id = @Id";
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlCommand command = new SqlCommand("dpr_sp_UpdateMaterialTransaction", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Id", id);
+                    command.Parameters.AddWithValue("@BlockQuantity", BlockQuantity); // Assuming BlockQuantity is a property of type int in ViewEntryViewModel
+
+                    command.Parameters.AddWithValue("@JTDQuantity", JTDQuantity);
+                    command.Parameters.AddWithValue("@DayQuantity", DayQuantity);
+                    //command.Parameters.AddWithValue("@IsSubmitted",IsSubmitted);
+                    //command.Parameters.AddWithValue("@WBSNumber", WBSNumber);
+
+
                     command.ExecuteNonQuery();
                 }
             }
         }
+
+
+
+
+        // Controller action responsible for handling the AJAX request
+        [HttpPost]
+        public ActionResult IsSubmittedUpdateMaterialTransaction(int id, bool isSubmitted)
+        {
+            try
+            {
+                // Call the stored procedure to update IsSubmitted in the database
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
+                {
+                    connection.Open();
+                    var command = new SqlCommand("dpr_sp_IsSubmittedUpdateMaterialTransaction", connection);
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@Id", id);
+                    command.Parameters.AddWithValue("@IsSubmitted", isSubmitted);
+                    command.ExecuteNonQuery();
+                }
+
+                return Json(new { success = true, message = "Status updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
 
 
     }

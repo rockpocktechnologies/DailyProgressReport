@@ -1,8 +1,5 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-
-
+﻿@* @model ViewEntryViewModel *@
+@model DailyProgressReport.Models.ShowGroupCode
 @using Microsoft.AspNetCore.Antiforgery
 @inject IAntiforgery Antiforgery
 @{
@@ -18,33 +15,79 @@
         border-collapse: collapse;
     }
 
-
     th, td {
         text-align: center;
         padding: 8px;
         border: 1px solid #ddd;
     }
 
+    /* Style for delete icon button */
+    .delete-icon {
+        cursor: pointer;
+    }
+
+    /* Style for submit and edit buttons */
+    button.submit-button:hover {
+        /* margin-left: 5px;
+            background-color: darkred; */
+        cursor: pointer;
+    }
+
+    /* .EditViewEntry {
+            text-decoration: none;
+            color: blue;
+        }
+
+        .cancelViewEntry {
+            text-decoration: none;
+            color: red;
+        } */
 
     /* Style for delete icon button */
     .delete-icon {
         cursor: pointer;
     }
 
-
-    /* Style for submit and edit buttons */
-    button.submit-button:hover {
-        margin-left: 5px;
-        background-color: darkred;
+    /* Style for submit and cancel buttons */
+    button.submit-button:hover,
+    /*   a.cancel-button:hover {
+            color: darkred;
+            /* Change the color of the icon on hover
+        }
+     */
+    /* Style for Font Awesome icons inside buttons */
+    button i.fas,
+    a i.fas {
+        /* Adjust the margin or padding if needed */
     }
-</style>
 
+        /* Optionally, you can style the icons individually */
+        button i.fas.fa-check-circle {
+            /* Adjust specific styles for the check circle icon if needed */
+        }
+
+    /*  a.cancel-button i.fas.fa-times-circle {
+            /* Adjust specific styles for the times circle icon if needed
+        } */
+
+    /* Optionally, you can adjust the styles for the edit button */
+    .a.cancel-button {
+        cursor: pointer;
+        /* Change the background color and text color on hover if needed */
+    }
+
+    .edit-button:hover {
+        cursor: pointer;
+        /* Change the background color and text color on hover if needed */
+    }
+
+</style>
 
 <table id="materialTransactionTable" class="display responsive nowrap" style="width:100%">
     <thead>
         <tr>
             <th>Date</th>
-            <th>Job Code </th>
+            <th>Project Name </th>
             <th>Block Name</th>
             <th>Component Name</th>
             <th>Location Name</th>
@@ -52,37 +95,38 @@
             <th>BOQ Head Name</th>
             <th>BOQ Reference</th>
             <th>Activity Code</th>
-            <th>Block Quantity</th>
             <th>Type Of Pipe</th>
             <th>Dia Of Pipe</th>
             <th>UOM</th>
+            <th>Block Quantity</th>
             <th>JTD Quantity</th>
             <th>Day Quantity</th>
             <th>IsSubmitted</th>
             <th>WBS Number</th>
-            <th>Actions</th> <!-- Action column header -->
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.viewentry)
         {
             <tr data-id=@item.Id>
-
                 <td>
-                    @{
-                        if (item.Date != DateTime.MinValue)
-                        {
-                            <text>@item.Date.ToString("dd/MM/yyyy")</text>
-                        }
-                        else
-                        {
-                            <text>N/A</text> <!-- Or any default value/message you prefer -->
-                        }
-                    }
+
+                    @*   @{
+                if (item.Date != DateTime.MinValue)
+                {
+                <text>@item.Date.("dd/MM/yyyy")</text>
+                }
+                else
+                {
+                <text>N/A</text> <!-- Or any default value/message you prefer -->
+                }
+                }  *@
+
+                    @item.Date
                 </td>
-
-
                 <td>@item.ProjectName</td>
+
                 <td>@item.BlockName</td>
                 <td>@item.ComponentName</td>
                 <td>@item.LocationName</td>
@@ -90,40 +134,89 @@
                 <td>@item.BOQHeadName</td>
                 <td>@item.BOQReferenceID</td>
                 <td>@item.ActivityCode</td>
-                <td>@item.BlockQuantity</td>
+
                 <td>@item.TypeOfPipe</td>
                 <td>@item.DiaOfPipe</td>
                 <td>@item.UOM</td>
+                <td>@item.BlockQuantity</td>
                 <td>@item.JTDQuantity</td>
                 <td>@item.DayQuantity</td>
                 <td>@item.IsSubmitted</td>
+
                 <td>@item.WBSNumber</td>
+
                 <td>
-                    <i class="delete-icon fas fa-trash-alt text-danger" onclick="deleteEntry(this)" title="Delete Entry"></i>
 
 
-                    <button onclick="toggleSubmission(this)" class="btn btn-danger">Submit</button>
+
+                    <i class="delete-icon" onclick="deleteEntry(@item.Id)">
+                        <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
+                    </i>
+
+                    @*   <button onclick="toggleSubmission(@item.Id)" class="btn btn-danger">
+                <i class="fas fa-check-circle"></i> <!-- Font Awesome check circle icon -->
+                Submit
+                </button> *@
 
 
-                    <button onclick="editEntry(this)" class="btn btn-danger edit-button">Edit</button>
+                    <button onclick="toggleSubmission(@item.Id)" class="submit-button">
+                        <svg style="color: Green" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.97 5.97a.757.757 0 0 1 1.061 1.06l-5.066 5.667a.757.757 0 0 1-1.121.02L3.01 8.427a.757.757 0 1 1 1.096-1.04l1.56 1.87 4.585-5.13a.252.252 0 0 1 .02-.03z" />
+                        </svg>
+
+                    </button>
 
 
-                    <button onclick="updateEntry(this)" class="btn btn-danger update-button" style="display:none;">Update</button>
-                    <button onclick="cancelEdit(this)" class="btn btn-danger cancel-button" style="display:none;">Cancel</button>
+
+
+
+
+
+
+                    @*  <i class="btn btn-danger  edit-button" onclick="editEntry(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+                </i>
+                *@
+
+                    <i class="edit-button" onclick="editEntry(this)">
+                        <svg style="color: Black" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+                    </i>
+
+
+
+
+                    <button onclick="updateEntry(@item.Id)" class="btn btn-danger update-button" style="display:none;">Update</button>
+
+
+                    @*  <a class="cancel-button" onclick="cancelEdit(this)" style="display:none; ">
+                <i class="fas fa-times-circle"></i> <!-- Font Awesome times circle icon -->
+                </a> *@
+
+                    <a class="cancel-button" onclick="cancelEdit(this)" style="display:none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="currentColor" d="M12 2C6.486 2 2 6.487 2 12s4.486 10 10 10 10-4.487 10-10S17.514 2 12 2zm5.293 15.293a.999.999 0 1 1-1.414 1.414L12 13.414l-4.879 4.879a.999.999 0 1 1-1.414-1.414L10.586 12 5.707 7.121a.999.999 0 1 1 1.414-1.414L12 10.586l4.879-4.879a.999.999 0 1 1 1.414 1.414L13.414 12l4.879 4.879z" />
+                        </svg>
+                    </a>
+
+
+                    @*
+
+
+                <a class="btn btn-danger cancel-button" onclick="cancelEdit(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M12 2c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10-4.477-10-10-10zm5 13.586l-1.414 1.414-3.586-3.586-3.586 3.586-1.414-1.414 3.586-3.586-3.586-3.586 1.414-1.414 3.586 3.586 3.586-3.586 1.414 1.414-3.586 3.586 3.586 3.586z" />
+                </svg>
+                </a>
+                *@
+
 
 
                 </td>
-
-
             </tr>
         }
     </tbody>
     <tbody>
-
-
-
 </table>
-
 
 <form id="deleteForm" method="post" action="/ViewEntry/Delete">
     @Html.AntiForgeryToken()
@@ -134,7 +227,6 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.5/datatables.min.js"></script>
 
-
 <script>
     $(document).ready(function () {
         $('#materialTransactionTable').DataTable({
@@ -142,42 +234,43 @@
         });
     });
 
-
     var currentlyEditedRowId = null;
 
 
-    function deleteEntry(deleteIcon) {
-        var confirmDelete = confirm("Are you sure you want to delete this entry?");
-        if (confirmDelete) {
-            var row = $(deleteIcon).closest('tr'); // Find the closest row to the clicked delete icon
-            // Perform deletion logic here based on row position or other attributes
-            row.remove(); // Remove the row from the table
-            alert('Entry deleted successfully.');
+
+
+
+    function toggleSubmission(id) {
+        var confirmSubmit = confirm("Are you sure you want to change the status to 'Submitted'?");
+        if (confirmSubmit) {
+            // Set IsSubmitted to true
+            var isSubmitted = true;
+
+            // AJAX POST request
+            $.ajax({
+                url: '/ViewEntry/IsSubmittedUpdateMaterialTransaction', // Update the URL with your controller name
+                type: 'POST',
+                data: { id: id, isSubmitted: isSubmitted }, // Pass id and isSubmitted as data
+                success: function (response) {
+                    if (response.success) {
+                        alert('Status changed to Submitted successfully.');
+                        // You can perform additional actions here if needed
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+
+                    ReloadViewEntry()
+                },
+                error: function (xhr, status, error) {
+                    alert('Error updating status: ' + error);
+                }
+            });
         }
     }
 
 
 
 
-
-    function toggleSubmission(entryName) {
-        // Send AJAX request to update the submission status on the server
-        $.ajax({
-            url: '/ViewEntry/Submit',
-            type: 'POST',
-            data: { entryName: entryName }, // Pass the entryName to identify the entry
-            success: function (response) {
-                if (response.success) {
-                    // Handle success
-                } else {
-                    // Handle error
-                }
-            },
-            error: function (xhr, status, error) {
-                // Handle error
-            }
-        });
-    }
 
 
 
@@ -188,106 +281,36 @@
         // Cancel editing for any previously edited row
         cancelEdit();
 
-
         // Store original values in data attributes for cancel functionality
-        row.find('td:not(:last-child)').each(function () {
-            var text = $(this).text();
-            $(this).data('original-value', text);
-            $(this).html('<input type="text" class="form-control" value="' + text + '">');
+        row.find('td:not(:last-child)').each(function (index) {
+            // Check if the column index is within the editable range
+            if (index !== 0 && index !== 1 && index !== 2 && index !== 3 && index !== 4 && index !== 5 && index !== 6 && index !== 7 && index !== 8 && index !== 9 && index !== 10 && index !== 11 && index !== 15 && index !== 16) {
+                var text = $(this).text();
+                var entryId = row.data('id'); // Get the entry ID from the data attribute
+                var columnName = $(this).index(); // Get the column index
+                var inputId = 'input_' + columnName + '_' + entryId; // Construct the input ID
+
+                $(this).data('original-value', text);
+                $(this).html('<input type="text" class="form-control" id="' + inputId + '" value="' + text + '">');
+            }
         });
 
 
         // Hide edit button for the edited row
         row.find('.edit-button').hide();
 
-
         // Show update and cancel buttons for the edited row
         row.find('.update-button, .cancel-button').show();
-
-
-        // Disable edit for other rows
-        $('#materialTransactionTable tbody tr').not(row).find('.edit-button').prop('disabled', true);
+        // Hide edit button and show save button for the edited row
+        // row.find('.edit-button').hide();
+        // row.find('.save-button').show();
     }
 
 
-    function updateEntry(button) {
-        var row = $(button).closest('tr'); // Find the closest row to the button that was clicked
-
-
-        // Extract data from input fields in the row using jQuery selectors
-        var id = row.data('id');
-        var dateInput = row.find('input[name="Date"]').val();
-        var jobCodeID = row.find('input[name="JobCodeID"]').val();
-        var blockName = row.find('input[name="BlockName"]').val();
-        var componentName = row.find('input[name="ComponentName"]').val();
-        var locationName = row.find('input[name="LocationName"]').val();
-        var villageName = row.find('input[name="VillageName"]').val();
-        var boqHeadName = row.find('input[name="BOQHeadName"]').val();
-        var boqReferenceID = row.find('input[name="BOQReferenceID"]').val();
-        var activityCode = row.find('input[name="ActivityCode"]').val();
-        var blockQuantity = row.find('input[name="BlockQuantity"]').val();
-        var typeOfPipe = row.find('input[name="TypeOfPipe"]').val();
-        var diaOfPipe = row.find('input[name="DiaOfPipe"]').val();
-        var uom = row.find('input[name="UOM"]').val();
-        var jtdQuantity = row.find('input[name="JTDQuantity"]').val();
-        var dayQuantity = row.find('input[name="DayQuantity"]').val();
-        var isSubmitted = row.find('input[name="IsSubmitted"]').val();
-        var wbsNumber = row.find('input[name="WBSNumber"]').val();
-
-
-        var data = {
-            Id: id,
-            Date: dateInput,
-            JobCodeID: jobCodeID,
-            BlockName: blockName,
-            ComponentName: componentName,
-            LocationName: locationName,
-            VillageName: villageName,
-            BOQHeadName: boqHeadName,
-            BOQReferenceID: boqReferenceID,
-            ActivityCode: activityCode,
-            BlockQuantity: blockQuantity,
-            TypeOfPipe: typeOfPipe,
-            DiaOfPipe: diaOfPipe,
-            UOM: uom,
-            JTDQuantity: jtdQuantity,
-            DayQuantity: dayQuantity,
-            IsSubmitted: isSubmitted,
-            WBSNumber: wbsNumber
-        };
-
-
-        $.ajax({
-            url: '/ViewEntry/Edit/' + id,
-            type: 'POST',
-            data: data,
-            success: function (response) {
-                if (response.success) {
-                    alert('Entry updated successfully.');
-                    // Restore original values for non-date fields
-                    row.find('td:not(:first-child)').each(function () {
-                        var originalValue = $(this).data('original-value');
-                        $(this).text(originalValue);
-                    });
-                    // Update date cell with the new formatted date
-                    row.find('td:first-child').text(dateInput);
-                    // Show the edit button after successful update
-                    row.find('.edit-button').show();
-                    row.find('.update-button, .cancel-button').hide();
-                } else {
-                    alert('Error updating entry: ' + response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                alert('Error updating entry: ' + error);
-            }
-        });
-    }
 
 
     function cancelEdit(button) {
         var row = $(button).closest('tr');
-
 
         // Restore original values for the row
         row.find('td:not(:last-child)').each(function () {
@@ -295,15 +318,100 @@
             $(this).text(originalValue);
         });
 
-
         // Show the edit button and hide update/cancel buttons
         row.find('.edit-button').show();
         row.find('.update-button, .cancel-button').hide();
 
-
         // Enable edit for other rows
         $('#materialTransactionTable tbody tr').not(row).find('.edit-button').prop('disabled', false);
     }
+
+
+
+    function updateEntry(id) {
+
+        // var typeOfPipe = $('#input_10_' + id).val();
+        // var diaOfPipe = $('#input_11_' + id).val();
+        // var uom = $('#input_12_' + id).val();
+        var blockQuantity = $('#input_12_' + id).val();
+        var jtdQuantity = $('#input_13_' + id).val();
+        var dayQuantity = $('#input_14_' + id).val();
+        // var isSubmitted = $('#input_15_' + id).val(); // Get the value as text
+        // var wbsNumber = $('#input_16_' + id).val();
+
+        //  if (blockName !== "" && boqHead !== "" && boqNo !== "" && wbsNumber !== "" && boqDescription !== "" && uom !== "" && groupCode !== "" && activityCode !== "" && designQuantity !== "") {
+        // Use AJAX to call the controller action for updating a BOQ Reference
+        $.post('@Url.Action("UpdateViewEntry", "ViewEntry")', {
+            id: id,
+            blockQuantity: blockQuantity,
+            // typeOfPipe: typeOfPipe,
+            // diaOfPipe: diaOfPipe,
+            // uom: uom,
+            jtdQuantity: jtdQuantity,
+            dayQuantity: dayQuantity,
+            // isSubmitted: isSubmitted,
+            // wbsNumber: wbsNumber,
+        }, function (data) {
+            if (data.success) {
+                alert(data.message);  // Show success alert
+                // Reload the DataTable after updating a BOQ Reference
+                ReloadViewEntry();
+            } else {
+                alert(data.message);  // Show error alert
+            }
+        });
+        //  } else {
+        //      alert("Please fill in all fields");
+        // }
+    }
+
+
+    function deleteEntry(Id) {
+        if (confirm("Are you sure you want to delete this View Entry ?")) {
+            // Use AJAX to send a delete request to your server
+            $.ajax({
+                url: '/ViewEntry/DeleteMaterialTransaction',  // Update the URL to match your controller action
+                type: 'POST',
+                data: { Id: Id },
+                success: function (result) {
+                    if (result.success) {
+                        // Optionally update the UI or perform additional actions after successful deletion
+                        // For example, you might want to reload the table to reflect the updated data
+                        location.reload();
+                    } else {
+                        alert('Error deleting Activity Code: ' + result.message);
+                    }
+                    ReloadViewEntry()
+                },
+                error: function (error) {
+                    console.error('Error deleting Activity Code:', error);
+                }
+            });
+        }
+    }
+
+
+
+
+
+
+
+
+    function ReloadDataTable() {
+        // Reload or redraw your DataTable
+        $('#BOQTableTable').DataTable().ajax.reload();
+    }
+
+    function ReloadViewEntry() {
+        window.location.href = '/ViewEntry/Index';
+    }
+
+
+
+
+
+
+
 
 
 </script>
