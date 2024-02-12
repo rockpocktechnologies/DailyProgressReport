@@ -45,38 +45,6 @@ namespace DailyProgressReport.Controllers
             }
         }
 
-
-        //private List<ProjectViewModel> GetProjectsFromDatabase()
-        //{
-        //    List<ProjectViewModel> projects = new List<ProjectViewModel>();
-
-        //    using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
-        //    {
-        //        connection.Open();
-
-        //        using (SqlCommand command = new SqlCommand("SELECT * FROM dpr_tblProjects ORDER BY ProjectID DESC", connection))
-        //        {
-        //            using (SqlDataReader reader = command.ExecuteReader())
-        //            {
-        //                while (reader.Read())
-        //                {
-        //                    ProjectViewModel project = new ProjectViewModel
-        //                    {
-        //                        ProjectID = Convert.ToInt32(reader["ProjectID"]),
-        //                        ProjectName = reader["ProjectName"].ToString(),
-        //                        // Add other properties as needed
-        //                    };
-
-        //                    projects.Add(project);
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return projects;
-        //}
-
-
         private List<ProjectViewModel> GetAssignedProjects()
         {
             CommonFunction cmn = new CommonFunction();

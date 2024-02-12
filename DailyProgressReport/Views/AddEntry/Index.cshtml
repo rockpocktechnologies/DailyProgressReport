@@ -1,0 +1,54 @@
+﻿@model DailyProgressReport.Models.AddEntryModel
+
+<form style="text-align: center;">
+    <div class="form-group">
+        <h6 class="mb-4">Project:</h6>
+        <select id="projectId" name="projectId" class="form-control">
+            <option value="">Please Select</option>
+            @* @foreach (var project in Model.AddEntry)
+            {
+                <option value="@project.ProjectID">@project.ProjectName</option>
+            } *@
+        </select>
+    </div>
+
+
+    <div class="form-group">
+        <h6 class="mb-4">BOQ Reference:</h6>
+        <input type="text" id="BoqName" name="BoqName" class="form-control" placeholder="Enter BOQ Name">
+    </div>
+    <div class="form-group">
+        <h6 class="mb-4"> JDT Quantity:</h6>
+        <input type="text" id="JdtQuantity" name="JdtQuantity" class="form-control" placeholder="Enter Quantity">
+    </div> 
+    <div class="form-group">
+        <h6 class="mb-4"> Select Date:</h6>
+        <input type="date" id="calendarDate" class="form-control" onclick="openDatePicker()" />
+        
+    </div>
+    <div>
+        <button id="btnAddEntry" type="button" class="btn btn-danger" onclick="addEntry()">Add Entry</button>
+        <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
+    </div>
+</form>
+<div id="blockListContainer" class="container mt-4">
+    @*    <h3 class="text-center mb-4">Block List</h3>
+    *@    <table id="blockTable" class="table">
+        <thead>
+            <tr>
+                <th>Project</th>
+                <th>Block Quantitiy</th>
+                <th>JDT Quantitiy</th>
+                <th>Day Quantitiy</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+        </tbody>
+    </table>
+</div>
+<script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
+
+</script>
