@@ -6,35 +6,7 @@
 <div id="addComponentContainer" style="max-width: 800px; align-content: center; margin-left: 225px;"> *@
 
 <div id="addComponentContainer" class="container mt-4">
-    @*    <h3 class="text-center mb-4">Add Component</h3>
-    *@   @*  <form style="text-align: center;">
-
-    <div>
-    <h6 class="mb-4">Project :</h6>
-    <select id="projectName" name="projectName" class="form-control">
-    <option value="">Please Select</option>
-    @foreach (var project in Model.projects)
-    {
-    <option value="@project.ProjectID">@project.ProjectName</option>
-    }
-    </select>
-    </div>
-
-
-    <div class="form-group">
-    <h6 class="mb-4">Component Name:</h6>
-    <input type="text" id="componentName" name="componentName" class="form-control" placeholder="Enter Component Name">
-    </div>
-
-
-    <div style="margin-top: 15px;">
-    <button id="addComponentBtn" type="button" class="btn btn-danger" onclick="addComponent()">Add</button>
-    <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
-    </div>
-    </form> *@
-
-
-    <form style="text-align: center;">
+       <form style="text-align: center;">
 
         <div class="form-group">
             <h6 class="mb-4">Project:</h6>

@@ -1,54 +1,180 @@
 ﻿@model DailyProgressReport.Models.AddEntryModel
-
+<div id="assignProjectsContainer" class="container mt-4"
+     style="max-width: 800px;width:80%; margin: 20px auto; text-align: center;">
 <form style="text-align: center;">
     <div class="form-group">
-        <h6 class="mb-4">Project:</h6>
-        <select id="projectId" name="projectId" class="form-control">
+        <h6 class="mb-4">Project :</h6>
+        <select id="projectName" name="projectName" class="form-control">
             <option value="">Please Select</option>
-            @* @foreach (var project in Model.AddEntry)
+            @foreach (var project in Model.Projects)
             {
                 <option value="@project.ProjectID">@project.ProjectName</option>
-            } *@
+            }
         </select>
+
+    </div>
+    <div class="form-group">
+        <h6 class="mb-4">Block Quantity:</h6>
+        <input type="text" id="BlockQuantity" name="BlockQuantity" class="form-control" placeholder="Enter Quantity">
+    </div>
+    <div class="form-group">
+        <h6 class="mb-4"> BOQ Reference Id:</h6>
+            <input type="text" id="BOQReferenceID" name="BOQReferenceID" class="form-control" placeholder="Enter boqReference Id">
+    </div>
+    <div class="form-group">
+        <h6 class="mb-4"> JTD Quantity:</h6>
+        <input type="text" id="jtdQuantity" name="jtdQuantity" class="form-control" placeholder="Enter Quantity">
+    </div>
+    <div class="form-group">
+        <h6 class="mb-4">Date:</h6>
+        <input type="text" id="datepicker" class="form-control" placeholder="Select Date">
     </div>
 
-
-    <div class="form-group">
-        <h6 class="mb-4">BOQ Reference:</h6>
-        <input type="text" id="BoqName" name="BoqName" class="form-control" placeholder="Enter BOQ Name">
-    </div>
-    <div class="form-group">
-        <h6 class="mb-4"> JDT Quantity:</h6>
-        <input type="text" id="JdtQuantity" name="JdtQuantity" class="form-control" placeholder="Enter Quantity">
-    </div> 
-    <div class="form-group">
-        <h6 class="mb-4"> Select Date:</h6>
-        <input type="date" id="calendarDate" class="form-control" onclick="openDatePicker()" />
-        
-    </div>
-    <div>
-        <button id="btnAddEntry" type="button" class="btn btn-danger" onclick="addEntry()">Add Entry</button>
+    <div style="margin-top: 15px;">
+        <button id="btnAddEntry" type="button" class="btn btn-danger" onclick="AddEntry()">Add</button>
         <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
     </div>
 </form>
-<div id="blockListContainer" class="container mt-4">
-    @*    <h3 class="text-center mb-4">Block List</h3>
-    *@    <table id="blockTable" class="table">
+
+
+<div id="addEntriesContainer" class="container mt-4">
+       <table id="addEntriesTable" class="table">
         <thead>
             <tr>
-                <th>Project</th>
-                <th>Block Quantitiy</th>
-                <th>JDT Quantitiy</th>
-                <th>Day Quantitiy</th>
+                <th>Id</th>
+                <th>Block Quantity</th>
+                <th>BOQ ReferenceId </th>
+                <th>JTD Quantity</th>
+                <th>Date</th>
                 
             </tr>
         </thead>
         <tbody>
-            
+                @foreach (var entries in Model.Projects)
+                {
+                    <tr>
+                        <td>@entries.Id</td>
+                        <td>@entries.BlockQuantity</td>
+                        <td>@entries.BOQReferenceID</td>
+                        <td>@entries.JTDQuantity</td>
+                        <td>@entries.Date </td>
+
+
+                        <td>
+                            @* <i class="edit-icon" onclick="editentry(@entry.Id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
+                        </i>
+
+                        <i class="delete-icon" onclick="Deleteentry(@entry.Id)">
+                        <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
+                        </i>  *@
+                        </td>
+                    </tr>
+                }
         </tbody>
     </table>
+    </div>
 </div>
-<script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
+@* <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<!-- DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+
+<!-- jQuery UI for datepicker -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<!-- Add this line to include DataTables scripts -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css"> *@
+
+<script>
+    $(document).ready(function () {
+        // Initialize date picker
+        $("#datepicker").datepicker();
+    });
+    // $(document).ready(function () {
+    //     // Initialize DataTable for the component table
+    //     $('#addEntriesTable').DataTable({
+    //         "columnDefs": [
+    //             {
+    //                 "targets": [0],  // Index of the column (ProjectID in this case)
+    //                 "visible": false,
+    //                 "searchable": false,
+    //             }
+    //         ],
+    //         "order": [[0, "desc"]]  // Sort by ProjectID in descending order
+    //     });
+
+    // });
+
+
+    function AddEntry() {
+        
+        var BlockQuantity = $("#BlockQuantity").val();
+        var BOQReferenceID = $("#BOQReferenceID").val();
+        var jtdQuantity = $("#jtdQuantity").val();
+        var Date = $("#datepicker").datepicker("getDate");
+
+
+        // Use AJAX to call the controller action for adding a block
+        $.post('@Url.Action("AddEntry", "AddEntry")', { BlockQuantity: BlockQuantity, BOQReferenceID: BOQReferenceID, jtdQuantity: jtdQuantity }, function (data) {
+            if (data.success) {
+                alert(data.message);  // Show success alert
+                // Optionally, clear the form fields
+                $("#BlockQuantity").val("");
+                $("#BOQReferenceID").val("");
+                $("#jtdQuantity").val("");
+
+
+                // Optionally, hide the Add Block section
+                $("#addBlockContainer").hide();
+                // Show the Block List section
+                $("#blockListContainer").show();
+                // Reload the DataTable after adding a block
+                ReLoadDprBlock();
+            } else {
+                alert(data.message);  // Show error alert
+            }
+        });
+    }
+    $(document).ready(function () {
+        // Initialize DataTable for the component table
+        $('#addEntriesTable').DataTable({
+            "columns": [
+                { "data": "Id" },
+                { "data": "BlockQuantity" },
+                { "data": "BOQReferenceID" },
+                { "data": "JTDQuantity" },
+                { "data": "Date" }
+            ],
+            "order": [[0, "desc"]]  // Assuming Id is the first column in your data
+        });
+
+        // Call the API to get the data
+        $.ajax({
+            url: '/AddEntry/GetAddEntries', // Update the URL to match your controller/action
+            type: 'GET',
+            success: function (result) {
+                // Check if the API call was successful
+                if (result.success) {
+                    // Initialize DataTable
+                    var table = $('#addEntriesTable').DataTable();
+                    table.clear().rows.add(result.entries).draw();
+                } else {
+                    console.error(result.error);
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    });
+
+    function openaddMastersContainer() {
+        window.location.href = '/AddMaster/Index';
+    }
+
+    function ReLoadAddEntry() {
+        window.location.href = '/AddEntry/Index';
+    }
 </script>
