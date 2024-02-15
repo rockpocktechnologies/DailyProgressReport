@@ -11,8 +11,12 @@
         public int JTDQuantity { get; set; }
         public string Date { get; set; }
         public int BOQReferenceID { get; set; }
+        public List<AddEntryModel> entries { get; set; }
 
-        
+
+
+
+
 
     }
 }

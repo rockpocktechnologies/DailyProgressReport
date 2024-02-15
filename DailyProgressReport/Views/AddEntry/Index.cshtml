@@ -50,14 +50,14 @@
             </tr>
         </thead>
         <tbody>
-                @foreach (var entries in Model.Projects)
+                @foreach (var entry in Model.entries)
                 {
                     <tr>
-                        <td>@entries.Id</td>
-                        <td>@entries.BlockQuantity</td>
-                        <td>@entries.BOQReferenceID</td>
-                        <td>@entries.JTDQuantity</td>
-                        <td>@entries.Date </td>
+                        <td>@entry.Id</td>
+                        <td>@entry.BlockQuantity</td>
+                        <td>@entry.BOQReferenceID</td>
+                        <td>@entry.JTDQuantity</td>
+                        <td>@entry.Date </td>
 
 
                         <td>

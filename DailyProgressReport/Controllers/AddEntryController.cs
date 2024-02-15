@@ -29,7 +29,7 @@ namespace DailyProgressReport.Controllers
             {
                 AddEntryModel model = new AddEntryModel();
                 model.Projects = GetProjects();
-                //model.entries = GetAddEntriesFromDatabase();
+                model.entries = GetAddEntriesFromDatabase();
                 //return View( model);
                 List<AddEntryModel> projects = GetProjects();
                 List<AddEntryModel> entries = GetAddEntriesFromDatabase();
