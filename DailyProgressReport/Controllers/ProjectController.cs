@@ -210,7 +210,9 @@ namespace DailyProgressReport.Controllers
                                 ProjectID = Convert.ToInt32(reader["ProjectID"]),
                                 ProjectName = reader["ProjectName"].ToString(),
                                 ProjectShortName = reader["ProjectShortName"].ToString(),
-                                ProjectCode = reader["ProjectCode"].ToString()
+                                ProjectCode = reader["ProjectCode"].ToString(),
+                                IsCompleted = Convert.ToBoolean(reader["IsCompleted"])
+
                                 //ProjectStartDate = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["ProjectStartDate"].ToString()),
                                 //ProjectEndDate = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["ProjectEndDate"].ToString()),
                                 //ProjectRevisedDate = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["ProjectRevisedDate"].ToString())
@@ -311,7 +313,7 @@ namespace DailyProgressReport.Controllers
                 UpdateProjectCompletionStatus(ProjectID, IsCompleted);
 
                 // Return a JSON response
-                return Json(new { success = true });
+                return Json(new { success = true, IsCompleted = IsCompleted });
             }
             catch (Exception ex)
             {

@@ -15,7 +15,7 @@ namespace DailyProgressReport.Models
         public string? LocationName { get; set; }
         public string? VillageName { get; set; }
         public string BOQHeadName { get; set; }
-        public int BOQReferenceID { get; set; }
+        public string BOQReferenceID { get; set; }
         public string? ActivityCode { get; set; }
         public int? BlockQuantity { get; set; }
         public string TypeOfPipe { get; set; }

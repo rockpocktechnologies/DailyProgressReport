@@ -249,7 +249,7 @@ namespace DailyProgressReport.Controllers
                                 LocationName = reader["LocationName"] as string ?? string.Empty,
                                 VillageName = reader["VillageName"] as string ?? string.Empty,
                                 BOQHeadName = reader["BOQHeadName"] as string ?? string.Empty,
-                                BOQReferenceID = reader["BOQReferenceID"] != DBNull.Value ? Convert.ToInt32(reader["BOQReferenceID"]) : 0,
+                                BOQReferenceID = reader["BOQReferenceID"] as string ?? string.Empty,
                                 ActivityCode = reader["ActivityCode"] as string ?? string.Empty,
                                 BlockQuantity = reader["BlockQuantity"] != DBNull.Value ? (int)reader["BlockQuantity"] : (int?)null,
                                 TypeOfPipe = reader["TypeOfPipe"] as string ?? string.Empty,

@@ -216,6 +216,7 @@
 
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
     $(document).ready(function () {
@@ -481,42 +482,42 @@
             ],
             "order": [[0, "desc"]],
         });
+    });
 
+    $(document).ready(function () {
+      
         $('.completion-checkbox').change(function () {
-            var ProjectID = $(this).data('project-id');
-            var IsCompleted = $(this).prop('checked');
+            var checkbox = $(this);
+            var projectID = checkbox.data('project-id');
+            var isCompleted = checkbox.prop('checked');
+            var alertMessage = isCompleted ? "Project completed!" : "Project uncompleted!";
 
-            console.log('Checkbox change event triggered.');
-            console.log('ProjectID:', ProjectID);
-            console.log('IsCompleted:', IsCompleted);
+            alert(alertMessage);
 
-            // Update the alert message based on the checkbox state
-            //var alertMessage = IsCompleted ? "You want to complete Project" : "You want to uncomplete Project";
-            //alert(alertMessage);
-            if (confirm("Are you sure you want to complete this project?")) {
-
-                // Perform an AJAX call to update the completion status
-                $.ajax({
-                    url: '/Project/UpdateCompletionStatus',
-                    type: 'POST',
-                    data: { ProjectID: ProjectID, IsCompleted: IsCompleted },
-                    success: function (result) {
-                        if (result.success) {
-                            // Optional: Handle success (e.g., show a message)
-                            console.log('Completion status updated successfully.');
-                        } else {
-                            // Optional: Handle failure (e.g., show an error message)
-                            console.error('Failed to update completion status:', result.message);
-                        }
-                    },
-                    error: function () {
-                        // Optional: Handle AJAX error
-                        console.error('Error updating completion status.');
+            // Perform an AJAX call to update the completion status
+            $.ajax({
+                url: '/Project/UpdateCompletionStatus',
+                type: 'POST',
+                data: { projectID: projectID, isCompleted: isCompleted },
+                success: function (result) {
+                    if (result.success) {
+                        // Optional: Update the checkbox state based on the server response
+                        checkbox.prop('checked', result.isCompleted);
+                        console.log('Completion status updated successfully.');
+                    } else {
+                        // Optional: Handle failure (e.g., show an error message)
+                        console.error('Failed to update completion status:', result.message);
                     }
-                });
-            }
+                },
+                error: function () {
+                    // Optional: Handle AJAX error
+                    console.error('Error updating completion status.');
+                }
+            });
         });
     });
+
+   
 
 
     $(document).ready(function () {
