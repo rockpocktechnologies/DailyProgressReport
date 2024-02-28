@@ -61,27 +61,22 @@ namespace DailyProgressReport.Classes
                    // Add more date formats here as needed
                };
 
-                if (inputDate.Trim() == "Jan 1 1900 12:00AM" || inputDate.Trim() == "Jan  1 1900 12:00AM"
-                    || inputDate.Trim() == "01-01-1900 00:00:00" || inputDate.Trim() == "")
+                if (DateTime.TryParseExact(inputDate, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
                 {
-                    // Handle null date or the default date as needed
-                    return ""; // Or any other representation you prefer for null/default dates
+                    // Format the date as dd/mm/yy
+                    string convertedDate = parsedDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+                    return convertedDate;
                 }
                 else
                 {
-                    DateTime date = DateTime.ParseExact(inputDate, dateFormats, CultureInfo.InvariantCulture);
-
-                    // Format the date as dd/mm/yy
-                    string convertedDate = date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-
-                    return convertedDate;
+                    // Handle the case where the date cannot be parsed
+                    return "Invalid Date";
                 }
             }
             else
             {
                 return "";
             }
-
         }
         
     }
