@@ -255,10 +255,10 @@ namespace DailyProgressReport.Controllers
                                 TypeOfPipe = reader["TypeOfPipe"] as string ?? string.Empty,
                                 DiaOfPipe = reader["DiaOfPipe"] as string ?? string.Empty,
                                 UOM = reader["UOM"] as string ?? string.Empty,
-                                JTDQuantity = reader["JTDQuantity"] != DBNull.Value ? (int)reader["JTDQuantity"] : (int?)null,
-                                DayQuantity = reader["DayQuantity"] != DBNull.Value ? (int)reader["DayQuantity"] : (int?)null,
-                                IsSubmitted = reader["IsSubmitted"] != DBNull.Value && (bool)reader["IsSubmitted"],
-                                WBSNumber = reader["WBSNumber"] as string ?? string.Empty
+                                //JTDQuantity = reader["JTDQuantity"] != DBNull.Value ? (int)reader["JTDQuantity"] : (int?)null,
+                                //DayQuantity = reader["DayQuantity"] != DBNull.Value ? (int)reader["DayQuantity"] : (int?)null,
+                                //IsSubmitted = reader["IsSubmitted"] != DBNull.Value && (bool)reader["IsSubmitted"],
+                                //WBSNumber = reader["WBSNumber"] as string ?? string.Empty
                             };
 
                             activities.Add(viewentryViewModels);
