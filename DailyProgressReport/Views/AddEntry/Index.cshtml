@@ -1,80 +1,104 @@
 ﻿@model DailyProgressReport.Models.AddEntryModel
-<div id="assignProjectsContainer" class="container mt-4"
-     style="max-width: 800px;width:80%; margin: 20px auto; text-align: center;">
-<form style="text-align: center;">
-    <div class="form-group">
-        <h6 class="mb-4">Project :</h6>
-        <select id="projectName" name="projectName" class="form-control">
-            <option value="">Please Select</option>
-            @foreach (var project in Model.Projects)
-            {
-                <option value="@project.ProjectID">@project.ProjectName</option>
-            }
-        </select>
+<form>
 
-    </div>
-    <div class="form-group">
-        <h6 class="mb-4">Block Quantity:</h6>
-        <input type="text" id="BlockQuantity" name="BlockQuantity" class="form-control" placeholder="Enter Quantity">
-    </div>
-    <div class="form-group">
-        <h6 class="mb-4"> BOQ Reference Id:</h6>
-            <input type="text" id="BOQReferenceID" name="BOQReferenceID" class="form-control" placeholder="Enter boqReference Id">
-    </div>
-    <div class="form-group">
-        <h6 class="mb-4"> JTD Quantity:</h6>
-        <input type="text" id="jtdQuantity" name="jtdQuantity" class="form-control" placeholder="Enter Quantity">
-    </div>
-    <div class="form-group">
-        <h6 class="mb-4">Date:</h6>
-        <input type="text" id="datepicker" class="form-control" placeholder="Select Date">
-    </div>
-
-    <div style="margin-top: 15px;">
-        <button id="btnAddEntry" type="button" class="btn btn-danger" onclick="AddEntry()">Add</button>
-        <button type="button" class="btn btn-secondary" onclick="openaddMastersContainer()">Cancel</button>
+    <div id="assignProjectsContainer" class="container mt-4" style="max-width: 8000px; width: 80%; margin: 20px auto; text-align: center;">
+        <div class="row">
+            <div class="col-md-4">
+                <h6 class="mt-4">Project :</h6>
+                <select id="projectName" name="projectName" class="form-control" required onchange="loadBOQHeadNames()">
+                    <option value="">Please Select</option>
+                    @foreach (var project in Model.Projects) { <option value="@project.ProjectID">@project.ProjectName</option> } </select>
+            </div>
+            <div class="col-md-4">
+                <h6 class="mt-4">BOQ Reference:</h6>
+                <select id="BOQHeadName" name="BOQHeadName" class="form-control" required>
+                    <option value="">Please Select</option>
+                    @foreach (var BOQHeadNames in Model.BOQHeadNames)
+                    {
+                        <option value="@BOQHeadNames.BOQHeadName">@BOQHeadNames.BOQHeadName</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <h6 class="mt-4">Date:</h6>
+                <input type="text" id="datepicker" class="form-control" placeholder="Select Date" required>
+            </div>
+        </div>
     </div>
 </form>
 
 
+<div style="margin-top: 15px; text-align: center;">
+    <button id="btnsave" type="button" class="btn btn-danger" onclick="AddEntry()">Save</button>
+    <button id="btnSubmit" type="button" class="btn btn-danger" onclick="SaveSubmitEntries()">Submit</button>
+
+    <button id="btnAddRow" type="button" class="btn btn-danger" onclick="addRow()">+Add More Entry</button>
+
+</div>
+   
+    
+
+
 <div id="addEntriesContainer" class="container mt-4">
-       <table id="addEntriesTable" class="table">
-        <thead>
+        <table id="entry-row" class="table" >
+        <thead align="center">
             <tr>
-                <th>Id</th>
-                <th>Block Quantity</th>
-                <th>BOQ ReferenceId </th>
-                <th>JTD Quantity</th>
-                <th>Date</th>
+                <th>Project Name</th>              
+                
+                <th>BOQ Reference </th>
+                
+                <th>Day Quantity</th>
+
                 
             </tr>
-        </thead>
+                       <tr id="entry-row" class="dummyRow entry-row" style="display:none">
+                <td>
+                    <select id="projectName" name="projectName" class="form-control" required onchange="loadBOQHeadNames()">
+                    <option value="">Please Select</option>
+                    @foreach (var project in Model.Projects) { <option value="@project.ProjectID">@project.ProjectName</option> } </select>
+                </td>
+                <td>
+                    <select id="BOQHeadName" name="BOQHeadName" class="form-control" required>
+                        <option value="">Please Select</option>
+                        @foreach (var BOQHeadNames in Model.BOQHeadNames)
+                        {
+                            <option value="@BOQHeadNames.BOQHeadName">@BOQHeadNames.BOQHeadName</option>
+                        }
+                    </select>
+                </td>
+
+                <td class="clanederIconClickRow">
+                    <input id="" class="form-control mandatoryFields travelDate expenseDate fromDate"
+                           name="travelDate" type="text">
+                   
+                 <td class="hideForPrint">
+
+			
         <tbody>
-                @foreach (var entry in Model.entries)
-                {
-                    <tr>
-                        <td>@entry.Id</td>
-                        <td>@entry.BlockQuantity</td>
-                        <td>@entry.BOQReferenceID</td>
-                        <td>@entry.JTDQuantity</td>
-                        <td>@entry.Date </td>
+                <!-- Dummy row -->
+            <tr class="dummyRow entry-row" style="display:none">
+                <td>
+                    
+            </tr>
 
-
-                        <td>
-                            @* <i class="edit-icon" onclick="editentry(@entry.Id)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"> <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" /> </svg>
-                        </i>
-
-                        <i class="delete-icon" onclick="Deleteentry(@entry.Id)">
-                        <svg style="color: red" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"> <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" fill="red"></path> <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" fill="red"></path> </svg>
-                        </i>  *@
-                        </td>
-                    </tr>
-                }
         </tbody>
     </table>
+        
+
     </div>
-</div>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+</style>
 @* <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -87,43 +111,76 @@
 <!-- Add this line to include DataTables scripts -->
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css"> *@
 
+
 <script>
+
     $(document).ready(function () {
-        // Initialize date picker
         $("#datepicker").datepicker();
     });
-    // $(document).ready(function () {
-    //     // Initialize DataTable for the component table
-    //     $('#addEntriesTable').DataTable({
-    //         "columnDefs": [
-    //             {
-    //                 "targets": [0],  // Index of the column (ProjectID in this case)
-    //                 "visible": false,
-    //                 "searchable": false,
-    //             }
-    //         ],
-    //         "order": [[0, "desc"]]  // Sort by ProjectID in descending order
-    //     });
+    $(document).ready(function () {
+        $('#addEntriesTable').DataTable({
+            "columnDefs": [
+                {
+                    "targets": [0],  
+                    "visible": false,
+                    "searchable": false,
+                }
+            ],
+            "order": [[0, "desc"]]  
+        });
 
-    // });
+    });
+    var tableData = entries.map(function (entry) {
+        return [entry.Id, entry.ProjectName, entry.BOQHeadName, entry.DayQuantity];
+    });
 
+    var table = $('#addEntriesTable').DataTable();
+    table.clear().rows.add(tableData).draw();
 
     function AddEntry() {
-        
-        var BlockQuantity = $("#BlockQuantity").val();
-        var BOQReferenceID = $("#BOQReferenceID").val();
-        var jtdQuantity = $("#jtdQuantity").val();
+        var dynamicRowData = [];
+        $('#entry-row tbody tr').each(function () {
+            var rowData = {
+                projectName: $(this).find('.projectName').val(),
+                BOQHeadName: $(this).find('.BOQHeadName').val(),
+            };
+            dynamicRowData.push(rowData);
+        });
+        var projectName = $("#projectName").val();
+        var BOQHeadName = $("#BOQHeadName").val();
+        var DayQuantity = $("#DayQuantity").val();
         var Date = $("#datepicker").datepicker("getDate");
+
+        // Check if projectName is not selected
+        if (!projectName) {
+            alert("Please select a project.");
+            return;
+        }
+
+        // Check if BOQHeadName is not selected
+        if (!BOQHeadName) {
+            alert("Please select a BOQ Reference.");
+            return;
+        }
+
+        // Check if Date is not selected
+        if (!Date) {
+            alert("Please select a date.");
+            return;
+        }
 
 
         // Use AJAX to call the controller action for adding a block
-        $.post('@Url.Action("AddEntry", "AddEntry")', { BlockQuantity: BlockQuantity, BOQReferenceID: BOQReferenceID, jtdQuantity: jtdQuantity }, function (data) {
+        $.post('@Url.Action("AddEntry", "AddEntry")', { projectName: projectName, BOQHeadName: BOQHeadName, Date: Date, DayQuantity: DayQuantity }, function (data) {
             if (data.success) {
                 alert(data.message);  // Show success alert
                 // Optionally, clear the form fields
-                $("#BlockQuantity").val("");
-                $("#BOQReferenceID").val("");
-                $("#jtdQuantity").val("");
+                $("#projectName").val("");
+                $("#BOQHeadName").val("");
+                // $("#jtdQuantity").val("");
+                 $("#DayQuantity").val("");
+
+               
 
 
                 // Optionally, hide the Add Block section
@@ -131,24 +188,28 @@
                 // Show the Block List section
                 $("#blockListContainer").show();
                 // Reload the DataTable after adding a block
-                ReLoadDprBlock();
+                ReLoadAddEntry();
             } else {
                 alert(data.message);  // Show error alert
             }
         });
     }
-    $(document).ready(function () {
-        // Initialize DataTable for the component table
-        $('#addEntriesTable').DataTable({
-            "columns": [
-                { "data": "Id" },
-                { "data": "BlockQuantity" },
-                { "data": "BOQReferenceID" },
-                { "data": "JTDQuantity" },
-                { "data": "Date" }
-            ],
-            "order": [[0, "desc"]]  // Assuming Id is the first column in your data
-        });
+    $.ajax({
+        url: '@Url.Action("AddEntry", "AddEntry")',
+        type: 'POST',
+        data: {
+            projectName: $("#projectName").val(),
+            BOQHeadName: $("#BOQHeadName").val(),
+            // Other fields
+            dynamicRows: dynamicRowData
+        },
+        success: function (data) {
+            // Handle success or error
+        },
+        error: function (error) {
+            console.error(error);
+        }
+    });
 
         // Call the API to get the data
         $.ajax({
@@ -168,7 +229,8 @@
                 console.error(error);
             }
         });
-    });
+        
+    
 
     function openaddMastersContainer() {
         window.location.href = '/AddMaster/Index';
@@ -176,5 +238,61 @@
 
     function ReLoadAddEntry() {
         window.location.href = '/AddEntry/Index';
+        var table = $('#addEntriesTable').DataTable();
+        table.draw();
     }
+   
+
+       
+    let data = [];
+    
+    function addRow() {
+        var newRow = $(".dummyRow.entry-row").clone().removeClass("dummyRow").show();
+        newRow.find("input, select").val(''); 
+        $("#entry-row tbody").append(newRow);
+    }
+    function Submit(issubmitted) {
+
+        if (confirm("Are you sure you want to submit Entry?") == true) {
+            SaveSubmitEntry(issubmitted, false);
+        } else {
+            $('#preloader').hide();
+            text = "You canceled!";
+        }
+
+    }
+    
+    function loadBOQHeadNames() {
+        var selectedProject = $("#projectName").val();
+
+        // Check if a project is selected
+        if (selectedProject) {
+            // Use AJAX to fetch BOQ head names based on the selected project
+            $.ajax({
+                url: '/AddEntry/GetBOQHeadNames', // Update the URL to match your controller/action
+                type: 'GET',
+                data: { projectID: selectedProject },
+                success: function (result) {
+                    // Clear existing options in BOQ head dropdown
+                    $("#BOQHeadName").empty();
+
+                    // Add new options based on the result
+                    result.forEach(function (boqHead) {
+                        $("#BOQHeadName").append($('<option>', {
+                            value: boqHead.BOQHeadName,
+                            text: boqHead.BOQHeadName
+                        }));
+                    });
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        } else {
+            // Clear BOQ head dropdown if no project is selected
+            $("#BOQHeadName").empty();
+        }
+    }
+    
+
 </script>

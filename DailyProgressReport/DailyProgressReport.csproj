@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\PlanningController.cs" />
-    <Compile Remove="Controllers\Models\PlanningModel.cs" />
+    <Compile Remove="Models\PlanningModel.cs" />
   </ItemGroup>
 
   <ItemGroup>

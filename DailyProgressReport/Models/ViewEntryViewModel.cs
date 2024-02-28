@@ -6,8 +6,9 @@ namespace DailyProgressReport.Models
     {
         public int Id { get; set; }
         public string ProjectName { get; set; }
+        public DateTime Date { get; set; }
 
-        public DateTime? Date { get; set; }
+        // public DateOnly Date { get; set; }
         public string? JobCodeID { get; set; }
         public string? BlockName { get; set; }
         public string? ComponentName { get; set; }
@@ -27,6 +28,10 @@ namespace DailyProgressReport.Models
         public bool? IsSubmitted { get; set; }
         public string WBSNumber { get; set; }
 
+        //public static implicit operator ViewEntryViewModel(ViewEntryViewModel v)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 
 }

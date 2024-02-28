@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DailyProgressReport.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace DailyProgressReport
 {
     public class ProjectViewModel
     {
-        public List<ProjectViewModel> ProjectType { get; set; }
+        public List<ProjectType> ProjectType { get; set; }
 
         public int ProjectID { get; set; }
         public int ID { get; set; }

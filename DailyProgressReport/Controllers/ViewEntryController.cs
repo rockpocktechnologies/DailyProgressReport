@@ -23,21 +23,23 @@ namespace DailyProgressReport.Controllers
         }
         public IActionResult Index()
         {
-            try
-            {
-                ShowGroupCode shwo = new ShowGroupCode();
+            // try
+            // {
+            ShowViewEntry kor = new ShowViewEntry();
 
-                //  var viewEntryViewModels = GetMaterialTransactions();
+            ErrorViewModel error = new ErrorViewModel();
 
-                List<ViewEntryViewModel> activities = GetMaterialTransactions();
-                shwo.viewentry = activities;
-                return View(shwo);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                return View("Error");
-            }
+            var viewEntryViewModels = GetMaterialTransactions();
+
+            List<ViewEntryViewModel> activities = GetMaterialTransactions();
+            kor.viewentry = activities;
+            return View(kor);
+            // }
+            //catch (Exception ex)
+            //{
+            ////    // Log the exception
+            //    return View("Error");
+            //}
         }
 
         [HttpGet]
@@ -62,7 +64,7 @@ namespace DailyProgressReport.Controllers
                 if (updatedEntry.Date == null)
                 {
                     // Handle the case where Date is null (e.g., set it to DateTime.Now)
-                    updatedEntry.Date = DateTime.Now;
+                    updatedEntry.Date = DateTime.MaxValue;
                 }
                 UpdateMaterialTransaction(updatedEntry);
 
@@ -92,19 +94,7 @@ namespace DailyProgressReport.Controllers
             }
         }
 
-        //public IActionResult Delete(int id)
-        //{
-        //    try
-        //    {
-        //        DeleteMaterialTransaction(id);
-        //        return RedirectToAction("Index");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception
-        //        return View("Error");
-        //    }
-        //}
+
         [HttpPost]
         public IActionResult Submit(int id)
         {
@@ -140,21 +130,6 @@ namespace DailyProgressReport.Controllers
             }
         }
 
-
-        //public IActionResult Submit(int id)
-        //{
-        //    try
-        //    {
-        //        // Call a method to update IsSubmitted in the database
-        //        UpdateIsSubmitted(id);
-        //        return Json(new { success = true, message = "Entry submitted successfully." });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Return an error message if an exception occurs
-        //        return Json(new { success = false, message = "Error submitting entry: " + ex.Message });
-        //    }
-        //}
 
 
 
@@ -242,53 +217,62 @@ namespace DailyProgressReport.Controllers
             }
         }
 
-
         private List<ViewEntryViewModel> GetMaterialTransactions()
         {
-            var viewentryViewModels = new List<ViewEntryViewModel>();
+            var activities = new List<ViewEntryViewModel>();
 
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
             {
                 connection.Open();
 
-                using (SqlCommand command = new SqlCommand("[rockpock].[GetMaterialTransactions]", connection))
+                using (SqlCommand command = new SqlCommand("dpr_sp_GetMaterialTransactions", connection))
                 {
+
                     command.CommandType = CommandType.StoredProcedure;
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
+
                         while (reader.Read())
                         {
-                            var viewentryViewModel = new ViewEntryViewModel
+                            var viewentryViewModels = new ViewEntryViewModel
                             {
-                                Id = Convert.ToInt32(reader["ID"]),
-                                Date = (DateTime)reader["Date"],
-                                ProjectName = reader["ProjectName"] as string,
-                                BlockName = reader["BlockName"] as string,
-                                ComponentName = reader["ComponentName"] as string,
-                                LocationName = reader["LocationName"] as string,
-                                VillageName = reader["VillageName"] as string,
-                                BOQHeadName = reader["BOQHeadName"] as string,
-                                BOQReferenceID = Convert.ToInt32(reader["BOQReferenceID"]),
-                                ActivityCode = reader["ActivityCode"] as string,
-                                BlockQuantity = reader["BlockQuantity"] as int?,
-                                TypeOfPipe = reader["TypeOfPipe"] as string,
-                                DiaOfPipe = reader["DiaOfPipe"] as string,
-                                UOM = reader["UOM"] as string,
-                                JTDQuantity = reader["JTDQuantity"] as int?,
-                                DayQuantity = reader["DayQuantity"] as int?,
-                                IsSubmitted = reader["IsSubmitted"] as bool?,
-                                WBSNumber = reader["WBSNumber"] as string
+                                Id = reader["ID"] != DBNull.Value ? Convert.ToInt32(reader["ID"]) : 0,
+                                // Date = (DateOnly)reader["Date"],
+                                Date = reader["Date"] != DBNull.Value ? (DateTime)reader["Date"] : DateTime.MinValue,
+                                //Date = reader["Date"] != cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["Date"].ToString()),
+                                //Date = (DateTime)reader["Date"],
+
+                                ProjectName = reader["ProjectName"] as string ?? string.Empty,
+                                BlockName = reader["BlockName"] as string ?? string.Empty,
+                                ComponentName = reader["ComponentName"] as string ?? string.Empty,
+                                LocationName = reader["LocationName"] as string ?? string.Empty,
+                                VillageName = reader["VillageName"] as string ?? string.Empty,
+                                BOQHeadName = reader["BOQHeadName"] as string ?? string.Empty,
+                                BOQReferenceID = reader["BOQReferenceID"] != DBNull.Value ? Convert.ToInt32(reader["BOQReferenceID"]) : 0,
+                                ActivityCode = reader["ActivityCode"] as string ?? string.Empty,
+                                BlockQuantity = reader["BlockQuantity"] != DBNull.Value ? (int)reader["BlockQuantity"] : (int?)null,
+                                TypeOfPipe = reader["TypeOfPipe"] as string ?? string.Empty,
+                                DiaOfPipe = reader["DiaOfPipe"] as string ?? string.Empty,
+                                UOM = reader["UOM"] as string ?? string.Empty,
+                                JTDQuantity = reader["JTDQuantity"] != DBNull.Value ? (int)reader["JTDQuantity"] : (int?)null,
+                                DayQuantity = reader["DayQuantity"] != DBNull.Value ? (int)reader["DayQuantity"] : (int?)null,
+                                IsSubmitted = reader["IsSubmitted"] != DBNull.Value && (bool)reader["IsSubmitted"],
+                                WBSNumber = reader["WBSNumber"] as string ?? string.Empty
                             };
 
-                            viewentryViewModels.Add(viewentryViewModel);
+                            activities.Add(viewentryViewModels);
                         }
                     }
                 }
             }
 
-            return viewentryViewModels;
+            return activities;
         }
+
+
+
+
 
 
         //private void DeleteMaterialTransaction(int id)
@@ -354,8 +338,8 @@ namespace DailyProgressReport.Controllers
 
 
                 // Log or rethrow the exception with the updated message
-                var errorLogger = new CustomErrorLog(_configuration);
-                errorLogger.LogError(ex, exceptionMessage);
+                //  var errorLogger = new CustomErrorLog(_configuration);
+                //  errorLogger.LogError(ex, exceptionMessage);
                 return Json(new { error = ex.Message });
             }
         }

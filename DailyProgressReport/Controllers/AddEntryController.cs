@@ -16,6 +16,7 @@ namespace DailyProgressReport.Controllers
     public class AddEntryController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly List<AddEntryModel> _tempEntries = new List<AddEntryModel>(); // Temporary data structure
 
         public AddEntryController(IConfiguration configuration)
         {
@@ -27,11 +28,19 @@ namespace DailyProgressReport.Controllers
 
             try
             {
+                int projectID = 1;
                 AddEntryModel model = new AddEntryModel();
                 model.Projects = GetProjects();
+                model.BOQHeadNames = GetBOQHeadNames(projectID);
                 model.entries = GetAddEntriesFromDatabase();
-                //return View( model);
+                //model.all = Showdatatodatatable();
+
                 List<AddEntryModel> projects = GetProjects();
+                //List<AddEntryModel> BOQHeadName = GetBOQHeadNames(projectID);
+               // List<AllAddentrydataModel> all = Showdatatodatatable();
+
+
+
                 List<AddEntryModel> entries = GetAddEntriesFromDatabase();
 
                 return View(model);
@@ -80,11 +89,12 @@ namespace DailyProgressReport.Controllers
                                     AddEntryModel entry = new AddEntryModel
                                     {
                                         Id = (int)reader["Id"],
-                                        //ProjectName = reader["ProjectName"].ToString(),
+                                        ProjectName = reader["ProjectName"].ToString(),
                                         BlockQuantity = reader["BlockQuantity"] != DBNull.Value ? (int)reader["BlockQuantity"] : 0,
                                         JTDQuantity = reader["JTDQuantity"] != DBNull.Value ? (int)reader["JTDQuantity"] : 0,
+                                        //DayQuantity = reader["DayQuantity"] != DBNull.Value ? (int)reader["DayQuantity"] : 0,
                                         Date = cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["Date"].ToString()),
-                                        
+
                                     };
 
                                     entries.Add(entry);
@@ -130,8 +140,8 @@ namespace DailyProgressReport.Controllers
                                 ProjectName = reader["ProjectName"] is DBNull ? string.Empty : reader["ProjectName"].ToString(),
 
                                 //ProjectName = reader["ProjectName"].ToString(),
-                                
-                               
+
+
                             };
 
                             projects.Add(p);
@@ -142,9 +152,45 @@ namespace DailyProgressReport.Controllers
 
             return projects;
         }
+        [HttpGet]
+        private List<AddEntryModel> GetBOQHeadNames(int projectID)
+        {
+            List<AddEntryModel> BOQHeadNames = new List<AddEntryModel>();
+            //return Json(BOQHeadNames.Select(x => x.BOQHeadName).ToList());
 
+
+            using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand("select * from dpr_boqhead", connection))
+                {
+                   // command.CommandType = CommandType.StoredProcedure;
+
+                    // Add the parameter for projectID
+                    command.Parameters.AddWithValue("@ProjectID", projectID);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            AddEntryModel p = new AddEntryModel
+                            {
+                                ProjectID = Convert.ToInt32(reader["ProjectID"]),
+                                BOQHeadName = reader["BOQHeadName"] is DBNull ? string.Empty : reader["BOQHeadName"].ToString(),
+                            };
+
+                            BOQHeadNames.Add(p);
+                        }
+                    }
+                }
+            }
+
+            return BOQHeadNames;
+        }
+        
         [HttpPost]
-        public ActionResult AddEntryToDatabase( int BlockQuantity, int BOQReferenceID, int jtdQuantity, DateTime Date)
+        public ActionResult AddEntryToDatabase(string ProjectID, string BOQHeadName, DateTime Date)
         {
             try
             {
@@ -152,14 +198,19 @@ namespace DailyProgressReport.Controllers
                 {
                     connection.Open();
 
-                    using (SqlCommand command = new SqlCommand("INSERT INTO dpr_MaterialTransactions ( BlockQuantity, BOQReferenceID, JTDQuantity,Date) VALUES ( @BlockQuantity, @BOQReferenceID, @JTDQuantity,@Date)", connection))
+                    int Id;
+                    using (SqlCommand retrieveCommand = new SqlCommand("SELECT Id FROM dpr_boqhead WHERE BOQHeadName = @BOQHeadName", connection))
                     {
-                        // Add parameters to the SQL command
-                        command.Parameters.AddWithValue("@BlockQuantity", Convert.ToInt32 (BlockQuantity));
-                        command.Parameters.AddWithValue("@BOQReferenceID", BOQReferenceID);
-                        command.Parameters.AddWithValue("@JTDQuantity", jtdQuantity);
-                        command.Parameters.AddWithValue("@Date", Date);
+                        retrieveCommand.Parameters.AddWithValue("@BOQHeadName", BOQHeadName);
+                        Id = Convert.ToInt32(retrieveCommand.ExecuteScalar());
+                    }
 
+                    // Insert data into dpr_MaterialTransactions
+                    using (SqlCommand command = new SqlCommand("INSERT INTO dpr_MaterialTransactions (ProjectID, BOQHeadID, Date) VALUES (@ProjectID, @BOQHeadID, @Date)", connection))
+                    {
+                        command.Parameters.AddWithValue("@ProjectID", Convert.ToInt32(ProjectID));
+                        command.Parameters.AddWithValue("@BOQHeadID", Id);  // Use the retrieved BOQHeadID
+                        command.Parameters.AddWithValue("@Date", Date);
 
                         command.ExecuteNonQuery();
                     }
@@ -172,36 +223,101 @@ namespace DailyProgressReport.Controllers
                 return Json(new { success = false, message = "Error adding Entry", error = ex.Message });
             }
         }
-            [HttpPost]
-            public IActionResult AddEntry( int BlockQuantity,int BOQReferenceID, int jtdQuantity)
+
+        
+        [HttpPost]
+        public IActionResult AddEntry(string projectName, string BOQHeadName, List<DynamicRowData> dynamicRows)
+        {
+            try
             {
-                try
+                string loggedInUserId = HttpContext.Session.GetString("SLoggedInUserID");
+                if (loggedInUserId != null && loggedInUserId != "")
                 {
-                    string loggedInUserId = HttpContext.Session.GetString("SLoggedInUserID");
-                    if (loggedInUserId != null && loggedInUserId != "")
-                    {
                     DateTime Date = DateTime.Now;
 
-                    AddEntryToDatabase( BlockQuantity, BOQReferenceID, jtdQuantity, Date); // Replace "User123" with the actual user or logged-in user
-                        return Json(new { success = true, message = "Entry added successfully!" });
-                    }
-                    else
-                    {
-                        return Json(new { success = false, message = $"Error adding Entry, please login and try again." });
-
-                    }
+                    AddEntryToDatabase(projectName, BOQHeadName, Date); // Replace "User123" with the actual user or logged-in user
+                    return Json(new { success = true, message = "Entry added successfully!" });
                 }
-                catch (Exception ex)
+                else
                 {
-                    string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
-                    string exceptionMessage = $"Exception in method '{methodName}'";
+                    return Json(new { success = false, message = $"Error adding Entry, please login and try again." });
 
-                    // Log or rethrow the exception with the updated message
-                    var errorLogger = new CustomErrorLog(_configuration);
-                    errorLogger.LogError(ex, exceptionMessage);
-                    return Json(new { error = ex.Message });
                 }
             }
+            catch (Exception ex)
+            {
+                string methodName = System.Reflection.MethodBase.GetCurrentMethod().Name;
+                string exceptionMessage = $"Exception in method '{methodName}'";
+
+                // Log or rethrow the exception with the updated message
+                var errorLogger = new CustomErrorLog(_configuration);
+                errorLogger.LogError(ex, exceptionMessage);
+                return Json(new { error = ex.Message });
+            }
+        }
+        [HttpPost]
+        public ActionResult SaveSubmitEntries(List<AddEntryModel> entries, bool issubmitted)
+        {
+            try
+            {
+                // Add logic to save or submit entries to the database
+                SaveOrSubmitEntries(entries, issubmitted);
+
+                return Json(new { success = true, message = issubmitted ? "Entries submitted successfully" : "Entries saved successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error saving or submitting entries", error = ex.Message });
+            }
+        }
+        private void SaveOrSubmitEntries(List<AddEntryModel> entries, bool issubmitted)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
+                {
+                    connection.Open();
+
+                    foreach (var entry in entries)
+                    {
+                        // Retrieve BOQHeadID based on BOQHeadName
+                        int boqHeadId;
+                        using (SqlCommand retrieveCommand = new SqlCommand("SELECT Id FROM dpr_boqhead WHERE BOQHeadName = @BOQHeadName", connection))
+                        {
+                            retrieveCommand.Parameters.AddWithValue("@BOQHeadName", entry.BOQHeadName);
+                            boqHeadId = Convert.ToInt32(retrieveCommand.ExecuteScalar());
+                        }
+
+                        // Insert data into dpr_MaterialTransactions
+                        using (SqlCommand command = new SqlCommand("INSERT INTO dpr_MaterialTransactions (ProjectID, BOQHeadID, Date,DayQuantity) VALUES (@ProjectID, @BOQHeadID, @Date,@DayQuantity)", connection))
+                        {
+                            command.Parameters.AddWithValue("@ProjectID", entry.ProjectID);
+                            command.Parameters.AddWithValue("@BOQHeadID", boqHeadId);  // Use the retrieved BOQHeadID
+                            command.Parameters.AddWithValue("@Date", entry.Date);
+                            command.Parameters.AddWithValue("@DayQuantity", entry.DayQuantity);
+
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                if (issubmitted)
+                {
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception or log it
+                string methodName = MethodBase.GetCurrentMethod().Name;
+                string exceptionMessage = $"Exception in method '{methodName}'";
+                var errorLogger = new CustomErrorLog(_configuration);
+                errorLogger.LogError(ex, exceptionMessage);
+                // You might want to throw the exception or handle it according to your application's needs
+                // throw;
+            }
+        }
+
         private List<AddEntryModel> GetProjectsFromDatabase()
         {
             List<AddEntryModel> projects = new List<AddEntryModel>();
@@ -256,7 +372,7 @@ namespace DailyProgressReport.Controllers
 
                     connection.Open();
 
-                    using (SqlCommand command = new SqlCommand("SELECT Id,BlockQuantity,BOQReferenceID,JTDQuantity,Date FROM dpr_MaterialTransactions", connection))
+                    using (SqlCommand command = new SqlCommand("SELECT Id,BlockQuantity,BOQReferenceID,JTDQuantity,Date,DayQuantity FROM dpr_MaterialTransactions", connection))
                     {
 
                         using (SqlDataReader reader = command.ExecuteReader())
@@ -272,6 +388,8 @@ namespace DailyProgressReport.Controllers
                                     BlockQuantity = reader["BlockQuantity"] != DBNull.Value ? (int)reader["BlockQuantity"] : 0,
                                     BOQReferenceID = reader["BOQReferenceID"] != DBNull.Value ? (int)reader["BOQReferenceID"] : 0,
                                     JTDQuantity = reader["JTDQuantity"] != DBNull.Value ? (int)reader["JTDQuantity"] : 0,
+                                    DayQuantity = reader["DayQuantity"] != DBNull.Value ? (int)reader["DayQuantity"] : 0,
+
                                     Date = reader["Date"] != DBNull.Value ? cmn.ConvertDateFormatmmddyytoddmmyyDuringDisplay(reader["Date"].ToString()) : "",
 
                                 };
@@ -295,8 +413,12 @@ namespace DailyProgressReport.Controllers
 
             return entries;
         }
-
-
+        
+        public class DynamicRowData
+        {
+            public string ProjectName { get; set; }
+            public string BOQHeadName { get; set; }
+        }
     }
 }
 

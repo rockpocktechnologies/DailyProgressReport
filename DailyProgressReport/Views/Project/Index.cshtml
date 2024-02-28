@@ -14,30 +14,10 @@
             }
             <table class="text-center form-table" style="margin-left: 100px;width: 750px">
                 <tbody>
-                    @* <tr>
-    <th><label>Project Type</label></th>
-    <td>
-        <select name="ProjectType" class="form-control">
-            <option value="Road" @(Model.Count > 0 && Model[0]?.ProjectType == "Road" ? "selected" : "")>Road</option>
-            <option value="Tunnel" @(Model.Count > 0 && Model[0]?.ProjectType == "Tunnel" ? "selected" : "")>Tunnel</option>
-            <option value="Underground" @(Model.Count > 0 && Model[0]?.ProjectType == "Underground" ? "selected" : "")>Underground</option>
-            <option value="Water" @(Model.Count > 0 && Model[0]?.ProjectType == "Water" ? "selected" : "")>Water</option>
-        </select>
-    </td>
-</tr> *@
-                    <tr>
-                        <th><label>Project Type</label></th>
-                        <td>
-                            <select name="ProjectType" class="form-control">
-                                <option value="Road">Road</option>
-                                <option value="Tunnel">Tunnel</option>
-                                <option value="Underground">Underground</option>
-                                <option value="Water">Water</option>
-                            </select>
-                        </td>
-                    </tr>
-@*                     @Html.DropDownList("ID", ViewBag.ProjectTypes as SelectList, "Select Project Type", new { @class = "form-control" })
- *@
+
+
+                    @Html.DropDownList("ProjectType", ViewBag.ProjectTypes as SelectList, "Select Project Type", new { @class = "form-control" })
+
                     <tr>
                         <th><label>Project Name</label></th>
                         <td><input name="ProjectName" class="form-control" value="@((Model[0] != null) ? Model[0].ProjectName : "")" /></td>
@@ -92,6 +72,18 @@
                             </select>
                         </td>
                     </tr>
+                    @* <tr>
+                        <th><label>Project type</label></th>
+                        <td>
+                            <select name="ProjectType" class="form-control" required>
+                                <option value="">Select Project Type</option>
+                                @foreach (var Type in Model)
+                                {
+                                    <option value="@Type.ID">@Type.Value</option>
+                                }
+                            </select>
+                        </td>
+                    </tr> *@
                     <tr>
                         <th><label>Project Name</label></th>
                         <td><input name="ProjectName" class="form-control" value="" required /></td>
@@ -223,6 +215,7 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     $(document).ready(function () {
@@ -525,70 +518,35 @@
         });
     });
 
-//     $(document).ready(function () {
-//         alert("new complete")
-//     // Function to set checkbox states based on server data
-//     function setCheckboxStates() {
-//         $('.completion-checkbox').each(function () {
-//             var ProjectID = $(this).data('project-id');
-//                 // Update the alert message based on the checkbox state
-//                 var alertMessage = IsCompleted ? "You want to complete Project" : "You want to uncomplete Project";
-//                          alert(alertMessage);
-//                 if (confirm("Are you sure you want to complete this project?")) {
-//             // Perform an AJAX call to get the completion status
-//             $.ajax({
-//                 url: '/Project/GetCompletionStatus',
-//                 type: 'GET',
-//                 data: { ProjectID: ProjectID },
-//                 success: function (result) {
-//                     if (result.success) {
-//                         // Update checkbox state based on completion status
-//                         $(this).prop('checked', result.isCompleted);
-//                     } else {
-//                         // Optional: Handle failure (e.g., show an error message)
-//                         console.error('Failed to get completion status:', result.message);
-//                     }
-//                 },
-//                 error: function () {
-//                     // Optional: Handle AJAX error
-//                     console.error('Error getting completion status.');
-//                 }
-//             });
-//         });
-//     }
 
-//     // Call the function to set checkbox states when the page loads
-//     setCheckboxStates();
-
-//     // Event handler for completion checkboxes
-//     $('.completion-checkbox').change(function () {
-//         var ProjectID = $(this).data('project-id');
-//         var IsCompleted = $(this).prop('checked');
-
-//         // Perform an AJAX call to update the completion status
-//         $.ajax({
-//             url: '/Project/UpdateCompletionStatus',
-//             type: 'POST',
-//             data: { ProjectID: ProjectID, IsCompleted: IsCompleted },
-//             success: function (result) {
-//                 if (result.success) {
-//                     // Optional: Handle success (e.g., show a message)
-//                     console.log('Completion status updated successfully.');
-//                 } else {
-//                     // Optional: Handle failure (e.g., show an error message)
-//                     console.error('Failed to update completion status:', result.message);
-//                 }
-//             },
-//             error: function () {
-//                 // Optional: Handle AJAX error
-//                 console.error('Error updating completion status.');
-//             }
-//         });
-//     });
-// });
-
-    
-
+    $(document).ready(function () {
+        // When the Project dropdown changes, fetch BOQHeadNames based on the selected ProjectID
+        $("#ddlProjects").change(function () {
+            var selectedProjectID = $(this).val();
+            if (selectedProjectID !== "") {
+                $.ajax({
+                    url: '@Url.Action("GetBOQHeadNames", "AddEntry")',
+                    type: 'GET',
+                    data: { projectID: selectedProjectID },
+                    success: function (data) {
+                        // Update the BOQHeadNames dropdown with the fetched data
+                        var ddlBOQHeadNames = $("#ddlBOQHeadNames");
+                        ddlBOQHeadNames.empty();
+                        ddlBOQHeadNames.append($('<option>').text('Select BOQ Head').val(''));
+                        $.each(data, function (index, item) {
+                            ddlBOQHeadNames.append($('<option>').text(item).val(item));
+                        });
+                    },
+                    error: function () {
+                        console.log("Error fetching BOQHeadNames.");
+                    }
+                });
+            } else {
+                // Clear BOQHeadNames dropdown if no Project is selected
+                $("#ddlBOQHeadNames").empty();
+            }
+        });
+    });
 
 
 </script>

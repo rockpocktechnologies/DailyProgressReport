@@ -29,6 +29,9 @@ namespace DailyProgressReport.Controllers
             {
                 // Assuming GetProjects() returns a List<ProjectViewModel>
                 List<ProjectViewModel> projects = GetProjects();
+                List<ProjectType> Type = GetProjectTypes();
+                ViewBag.ProjectTypes = GetProjectTypes();
+
                 return View(projects);
             }
             catch (Exception ex)
@@ -379,10 +382,10 @@ namespace DailyProgressReport.Controllers
                 throw new Exception($"Failed to update Location status for project ID {ProjectID}.", ex);
             }
         }
-        private List<ProjectViewModel> GetProjectTypes()
+        private List<ProjectType> GetProjectTypes()
         {
             CommonFunction cmn = new CommonFunction();
-            List<ProjectViewModel> projects = new List<ProjectViewModel>();
+            List<ProjectType> Types = new List<ProjectType>();
 
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ConnectionString")))
             {
@@ -394,21 +397,21 @@ namespace DailyProgressReport.Controllers
                     {
                         while (reader.Read())
                         {
-                            ProjectViewModel project = new ProjectViewModel
+                            ProjectType Type = new ProjectType
                             {
-                                ID = Convert.ToInt32(reader["ProjectID"]),
-                                Value = reader["ProjectName"].ToString(),
+                                ID = Convert.ToInt32(reader["ID"]),
+                                Value = reader["Value"].ToString(),
 
 
                             };
 
-                            projects.Add(project);
+                            Types.Add(Type);
                         }
                     }
                 }
             }
 
-            return projects;
+            return Types;
         }
         [HttpPost]
         public ActionResult validation(ProjectViewModel model)
